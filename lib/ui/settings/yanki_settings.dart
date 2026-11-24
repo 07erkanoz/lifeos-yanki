@@ -524,7 +524,13 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  [m.command, ...m.args].join(' '),
+                  m.command.isEmpty
+                      ? l(
+                          'Bu bilgisayarda bulunamadı. Kuruluysa Yankı’yı '
+                          'yeniden açın; olmazsa “Sunucu ekle” ile programın '
+                          'yolunu verin.',
+                        )
+                      : [m.command, ...m.args].join(' '),
                   style: const TextStyle(
                     fontFamily: 'JetBrainsMono',
                     fontSize: 11.5,
@@ -552,7 +558,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
           ),
           IconButton(
             tooltip: l('Dene'),
-            onPressed: probing ? null : () => _probe(m),
+            onPressed: probing || m.command.isEmpty ? null : () => _probe(m),
             icon: const Icon(Icons.play_circle_outline_rounded),
           ),
           if (!m.builtIn) ...[
@@ -568,8 +574,10 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
             ),
           ],
           Switch(
-            value: m.on,
-            onChanged: (v) => McpServers.instance.setOn(m.id, v),
+            value: m.on && m.command.isNotEmpty,
+            onChanged: m.command.isEmpty
+                ? null
+                : (v) => McpServers.instance.setOn(m.id, v),
           ),
         ],
       ),

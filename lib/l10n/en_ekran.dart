@@ -230,4 +230,5 @@ const enEkran = <String, String>{
   'Codex yokken konuşan yedek ses.':
       'The fallback voice when Codex is not available.',
   'Modeller': 'Models',
+  'Bu bilgisayarda bulunamadı. Kuruluysa Yankı’yı yeniden açın; olmazsa “Sunucu ekle” ile programın yolunu verin.': 'Not found on this computer. If it is installed, open Yankı again; otherwise give the program’s path with “Add server”.',
 };

@@ -236,10 +236,13 @@ abstract final class AiAssistant {
         '--system-prompt',
         _system,
         if (claudeModel.isNotEmpty) ...['--model', claudeModel],
-        if (claudeEffort.isNotEmpty)
-          ...['--effort', claudeEffort]
-        else if (tier != null)
-          ...['--effort', tier.effort],
+        if (claudeEffort.isNotEmpty) ...[
+          '--effort',
+          claudeEffort,
+        ] else if (tier != null) ...[
+          '--effort',
+          tier.effort,
+        ],
         '--mcp-config',
         jsonEncode(McpServers.instance.claudeConfig()),
         '--strict-mcp-config',

@@ -29,7 +29,8 @@ class AjanToolHost implements ToolHost {
     final servers = await McpServers.instance.load(again: true);
     return AjanToolHost([
       for (final s in servers)
-        if (s.on) McpClient(s, approve: AjanApprovals.instance.request),
+        if (s.on && s.command.isNotEmpty)
+          McpClient(s, approve: AjanApprovals.instance.request),
     ]);
   }
 

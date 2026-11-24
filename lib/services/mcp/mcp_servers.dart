@@ -110,21 +110,102 @@ class McpServers extends ChangeNotifier {
   List<McpServerConfig> get all => _servers;
   List<McpServerConfig> get enabled => [
     for (final s in _servers)
-      if (s.on) s,
+      if (s.on && s.command.isNotEmpty) s,
   ];
 
   static Future<File> Function() file = () async =>
       File(p.join((await supportDirectory()).path, 'mcp.json'));
 
-  /// Folio's program, where it is installed.
-  static String? get folioProgram {
-    for (final path in const [
+  /// Folio's program, wherever it is installed: LifeOS's package
+  /// (/opt/lifeos-folio), Folio's own per-user installer
+  /// (~/.local/share/lifeos-folio), the PATH, or what Folio's menu entry
+  /// starts (24 Kasım 2026: a home computer with Folio from its own
+  /// installer had no Folio here).
+  static String? get folioProgram => findFolio(Platform.environment);
+
+  /// [folioProgram] for [env]; [runnable] and [read] stand for the disk in
+  /// tests.
+  @visibleForTesting
+  static String? findFolio(
+    Map<String, String> env, {
+    bool Function(String path) runnable = _runnable,
+    List<String>? Function(String path) read = _lines,
+  }) {
+    final home = env['HOME'] ?? '';
+    final data = env['XDG_DATA_HOME'] ?? p.join(home, '.local/share');
+    for (final path in [
       '/opt/lifeos-folio/lifeos_folio',
       '/usr/bin/lifeos-folio',
+      p.join(data, 'lifeos-folio', 'lifeos_folio'),
+      p.join(home, '.local/opt/lifeos-folio/lifeos_folio'),
+      p.join(home, '.local/bin/lifeos-folio'),
+      p.join(home, '.local/bin/lifeos_folio'),
     ]) {
-      if (File(path).existsSync()) return path;
+      if (runnable(path)) return path;
     }
-    return which('lifeos_folio') ?? which('lifeos-folio');
+    String? onPath(String command) {
+      for (final dir in (env['PATH'] ?? '/usr/bin').split(':')) {
+        if (dir.isNotEmpty && runnable(p.join(dir, command))) {
+          return p.join(dir, command);
+        }
+      }
+      return null;
+    }
+
+    return onPath('lifeos_folio') ??
+        onPath('lifeos-folio') ??
+        _fromMenu(env, runnable, read, onPath);
+  }
+
+  static List<String>? _lines(String path) {
+    try {
+      final f = File(path);
+      return f.existsSync() ? f.readAsLinesSync() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool _runnable(String path) {
+    if (path.isEmpty) return false;
+    final f = File(path);
+    if (!f.existsSync()) return false;
+    return f.statSync().modeString().contains('x');
+  }
+
+  /// The program Folio's menu entry starts (com.erkanoz.evrak_convert).
+  static String? _fromMenu(
+    Map<String, String> env,
+    bool Function(String) runnable,
+    List<String>? Function(String) read,
+    String? Function(String) onPath,
+  ) {
+    final home = env['HOME'] ?? '';
+    final dirs = [
+      p.join(
+        env['XDG_DATA_HOME'] ?? p.join(home, '.local/share'),
+        'applications',
+      ),
+      for (final d
+          in (env['XDG_DATA_DIRS'] ?? '/usr/local/share:/usr/share').split(':'))
+        if (d.isNotEmpty) p.join(d, 'applications'),
+    ];
+    for (final dir in dirs) {
+      final lines = read(p.join(dir, 'com.erkanoz.evrak_convert.desktop'));
+      for (final line in lines ?? const <String>[]) {
+        if (!line.startsWith('Exec=')) continue;
+        final exec = line.substring(5).trim();
+        final program = exec.startsWith('"')
+            ? exec.substring(1, exec.indexOf('"', 1))
+            : exec.split(' ').first;
+        if (program.contains('/')) {
+          if (runnable(program)) return program;
+        } else if (onPath(program) case final found?) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 
   static String? which(String command) {
@@ -136,16 +217,17 @@ class McpServers extends ChangeNotifier {
     return null;
   }
 
+  /// Folio is always listed: with no program found its command is empty,
+  /// the settings say so, and nothing starts it.
   static List<McpServerConfig> _builtIns() => [
-    if (folioProgram case final folio?)
-      McpServerConfig(
-        id: folioId,
-        name: 'LifeOS Folio',
-        command: folio,
-        args: const ['--mcp', '--dis'],
-        builtIn: true,
-        approve: false,
-      ),
+    McpServerConfig(
+      id: folioId,
+      name: 'LifeOS Folio',
+      command: folioProgram ?? '',
+      args: const ['--mcp', '--dis'],
+      builtIn: true,
+      approve: false,
+    ),
     if (which('lifeos') case final lifeos?)
       McpServerConfig(
         id: lifeosId,
