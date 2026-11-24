@@ -110,7 +110,12 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
   void initState() {
     super.initState();
     appearance.load();
-    ajan.loadVoiceSettings();
+    // Started at login with no window (--arka): with the wake word off
+    // there is nothing to listen for, and Yankı ends.
+    unawaited(() async {
+      await ajan.loadVoiceSettings();
+      if (widget.hidden && _mode == _Mode.hidden && !_wantWake) await _quit();
+    }());
     FolioAjan.beforeVoice = WakeWord.instance.pause;
     WakeWord.instance.onWake = _woken;
     ajan.addListener(_followWake);
