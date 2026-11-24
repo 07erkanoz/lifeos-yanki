@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=LifeOS Yankı
+GenericName=Sesli ajan
+Comment=LifeOS'un sesli yapay zekâ ajanı
+Exec=lifeos-yanki %U
+Icon=tr.com.lifeos.Yanki
+StartupWMClass=tr.com.lifeos.Yanki
+Terminal=false
+Categories=Utility;
+Keywords=yankı;ses;ajan;asistan;yapay zekâ;

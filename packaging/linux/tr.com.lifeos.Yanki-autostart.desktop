@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=LifeOS Yankı (arka planda dinler)
+Comment="Merhaba Yankı" denince açılır
+Exec=lifeos-yanki --arka
+Icon=tr.com.lifeos.Yanki
+Terminal=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
