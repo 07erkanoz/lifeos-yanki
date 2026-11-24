@@ -167,8 +167,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
               _switch(
                 'Sistem tepsisinde kal',
                 'Pencere kapanınca Yankı tepside durur; simgeye tıklayınca '
-                    'açılır, menüsünden küre, ayarlar ve çıkış seçilir. '
-                    'GNOME’da AppIndicator eklentisi gerekir.',
+                    'açılır, menüsünden küre, ayarlar ve çıkış seçilir.',
                 s.tray,
                 (v) => ajan.saveSettings(s.copyWith(tray: v)),
               ),
