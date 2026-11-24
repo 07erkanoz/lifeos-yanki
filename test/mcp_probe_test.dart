@@ -12,7 +12,12 @@ void main() {
     final lifeos = McpServers.which('lifeos');
     if (!live || lifeos == null) return;
     final (n, err) = await McpClient.probe(
-      McpServerConfig(id: 'lifeos', name: 'LifeOS', command: lifeos, args: const ['mcp', 'sun']),
+      McpServerConfig(
+        id: 'lifeos',
+        name: 'LifeOS',
+        command: lifeos,
+        args: const ['mcp', 'sun'],
+      ),
     );
     // ignore: avoid_print
     print('lifeos: $n araç ${err ?? ''}');
@@ -22,7 +27,13 @@ void main() {
     final folio = McpServers.folioProgram;
     if (!live || folio == null) return;
     final c = McpClient(
-      McpServerConfig(id: 'folio', name: 'Folio', command: folio, args: const ['--mcp', '--dis'], approve: false),
+      McpServerConfig(
+        id: 'folio',
+        name: 'Folio',
+        command: folio,
+        args: const ['--mcp', '--dis'],
+        approve: false,
+      ),
     );
     final tools = await c.declarations();
     // ignore: avoid_print

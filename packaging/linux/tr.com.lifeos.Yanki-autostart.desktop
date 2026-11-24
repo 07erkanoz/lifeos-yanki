@@ -1,7 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=LifeOS Yankı (arka planda)
-Comment=Oturum açılınca tepside durur ve "Merhaba Yankı" denince açılır
+Name=LifeOS Yankı (background)
+Name[tr]=LifeOS Yankı (arka planda)
+Comment=Waits in the tray and opens when you say "Merhaba Yankı"
+Comment[tr]=Oturum açılınca tepside durur ve "Merhaba Yankı" denince açılır
 Exec=lifeos-yanki --arka
 Icon=tr.com.lifeos.Yanki
 Terminal=false

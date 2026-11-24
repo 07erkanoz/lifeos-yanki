@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/dil.dart';
 import '../../services/voice/ajan_approval.dart';
 import '../../services/voice/folio_ajan.dart';
 import '../../services/voice/live_conversation.dart';
@@ -16,7 +17,15 @@ import 'yanki_figures.dart';
 
 export 'ajan_theme.dart' show liveStateLabel;
 
-const _short = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+List<String> get _short => [
+  l('Pzt'),
+  l('Sal'),
+  l('Çar'),
+  l('Per'),
+  l('Cum'),
+  l('Cmt'),
+  l('Paz'),
+];
 
 /// The chosen look's colours for this screen (always dark).
 class _K {
@@ -79,6 +88,7 @@ class _JarvisViewState extends State<JarvisView>
   void initState() {
     super.initState();
     ajan.addListener(_changed);
+    Dil.current.addListener(_changed);
     AjanApprovals.instance
       ..shown += 1
       ..addListener(_changed);
@@ -109,6 +119,7 @@ class _JarvisViewState extends State<JarvisView>
   @override
   void dispose() {
     ajan.removeListener(_changed);
+    Dil.current.removeListener(_changed);
     AjanApprovals.instance
       ..shown -= 1
       ..removeListener(_changed);
@@ -325,7 +336,7 @@ class _JarvisViewState extends State<JarvisView>
         const Color(0x0FFFFFFF),
         _K.muted,
         _K.faint,
-        'Ses kapalı',
+        l('Ses kapalı'),
       ),
       _Mood.speaking => (
         _K.kure
@@ -333,7 +344,7 @@ class _JarvisViewState extends State<JarvisView>
             : _K.green.withValues(alpha: .12),
         _K.kure ? const Color(0xFF7EE2B0) : _K.green,
         _K.green,
-        'Konuşuyor',
+        l('Konuşuyor'),
       ),
       _Mood.listening => (
         _K.kure
@@ -341,23 +352,25 @@ class _JarvisViewState extends State<JarvisView>
             : _K.sky.withValues(alpha: .16),
         _K.sky,
         _K.kure ? const Color(0xFF4F86FF) : _K.sky,
-        'Dinliyor',
+        l('Dinliyor'),
       ),
       _Mood.working => (
         const Color.fromRGBO(245, 181, 68, .13),
         _K.amber,
         _K.amber,
-        'Araçlara bakıyor',
+        l('Araçlara bakıyor'),
       ),
-      _Mood.idle => (const Color(0x0FFFFFFF), _K.muted, _K.faint, 'Hazır'),
+      _Mood.idle => (const Color(0x0FFFFFFF), _K.muted, _K.faint, l('Hazır')),
     };
     final voiceName = identical(ajan.voice, ajan.codex)
         ? ajan.settings.codexVoice
         : ajan.settings.voice;
     final voiceText = voiceOn
-        ? 'Ses: ${ajan.voice.label}'
-              '${voiceName.isEmpty ? '' : ' · ${voiceName[0].toUpperCase()}${voiceName.substring(1)}'}'
-        : 'Ses kapalı';
+        ? l('Ses: {0}', [
+            '${ajan.voice.label}'
+                '${voiceName.isEmpty ? '' : ' · ${voiceName[0].toUpperCase()}${voiceName.substring(1)}'}',
+          ])
+        : l('Ses kapalı');
     return Container(
       height: 64,
       padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -424,40 +437,45 @@ class _JarvisViewState extends State<JarvisView>
             voiceText,
             voiceOn ? ajan.toggleTalk : null,
             tip: voiceOn
-                ? (ajan.voice.active ? 'Konuşmayı bitir' : 'Konuşmayı başlat')
-                : 'Sesi açmak için: Ayarlar',
+                ? (ajan.voice.active
+                      ? l('Konuşmayı bitir')
+                      : l('Konuşmayı başlat'))
+                : l('Sesi açmak için: Ayarlar'),
           ),
           if (voiceOn && identical(ajan.voice, ajan.codex)) ...[
             const SizedBox(width: 14),
             _button(
-              'Düşünme: ${ajan.effortLabel}',
+              l('Düşünme: {0}', [ajan.effortLabel]),
               ajan.nextEffort,
-              tip:
-                  'Codex’in düşünmesi: arttıkça cevap gecikir, kota daha çok '
-                  'harcanır. Kaydedilir; sonraki konuşmada geçerli olur.',
+              tip: l(
+                'Codex’in düşünmesi: arttıkça cevap gecikir, kota daha çok '
+                'harcanır. Kaydedilir; sonraki konuşmada geçerli olur.',
+              ),
             ),
             // Only where Claude is there to hand work to.
             if (ajan.claude != null) ...[
               const SizedBox(width: 14),
               _button(
-                'Ağır işler: ${ajan.heavyLabel}',
+                l('Ağır işler: {0}', [ajan.heavyLabel]),
                 ajan.toggleHandOn,
-                tip:
-                    'Taslak, uzun inceleme ve emsal araştırması kimde: '
-                    'Claude’da ya da Codex’in kendisinde. Kısa sorular her '
-                    'zaman Codex’te. Kaydedilir.',
+                tip: l(
+                  'Taslak, uzun inceleme ve emsal araştırması kimde: '
+                  'Claude’da ya da Codex’in kendisinde. Kısa sorular her '
+                  'zaman Codex’te. Kaydedilir.',
+                ),
               ),
             ],
           ],
           const SizedBox(width: 14),
           _button(
-            'Görünüm: ${_skin.label}',
+            l('Görünüm: {0}', [_skin.label]),
             () => ajan.setSkin(
               AjanSkin.values[(_skin.index + 1) % AjanSkin.values.length].name,
             ),
-            tip:
-                'Tam ekranın görünümü: Yankı, Ağ, Dalga, Küre, Reaktör, Hologram, Aura, '
-                'Kehribar. Kaydedilir.',
+            tip: l(
+              'Tam ekranın görünümü: Yankı, Ağ, Dalga, Küre, Reaktör, Hologram, Aura, '
+              'Kehribar. Kaydedilir.',
+            ),
           ),
           Container(
             width: 1,
@@ -476,15 +494,15 @@ class _JarvisViewState extends State<JarvisView>
             ),
           ),
           const SizedBox(width: 14),
-          _iconButton(Icons.tune_rounded, 'Ayarlar', widget.onSettings),
+          _iconButton(Icons.tune_rounded, l('Ayarlar'), widget.onSettings),
           const SizedBox(width: 14),
           _iconButton(
             Icons.close_fullscreen_rounded,
-            'Arkaya al (Esc)',
+            l('Arkaya al (Esc)'),
             widget.onMinimize,
           ),
           const SizedBox(width: 14),
-          _iconButton(Icons.close_rounded, 'Kapat', widget.onClose),
+          _iconButton(Icons.close_rounded, l('Kapat'), widget.onClose),
         ],
       ),
     );
@@ -517,13 +535,13 @@ class _JarvisViewState extends State<JarvisView>
   }
 
   String get _moodLabel {
-    if (!ajan.settings.on && !ajan.asking) return 'SES KAPALI';
-    if (ajan.voice.state == LiveState.connecting) return 'BAĞLANIYOR';
+    if (!ajan.settings.on && !ajan.asking) return l('SES KAPALI');
+    if (ajan.voice.state == LiveState.connecting) return l('BAĞLANIYOR');
     return switch (_mood) {
-      _Mood.idle => 'HAZIR',
-      _Mood.listening => 'DİNLİYOR',
-      _Mood.speaking => 'KONUŞUYOR',
-      _Mood.working => 'ARAÇLARA BAKIYOR',
+      _Mood.idle => l('HAZIR'),
+      _Mood.listening => l('DİNLİYOR'),
+      _Mood.speaking => l('KONUŞUYOR'),
+      _Mood.working => l('ARAÇLARA BAKIYOR'),
     };
   }
 
@@ -561,8 +579,10 @@ class _JarvisViewState extends State<JarvisView>
               child: Semantics(
                 button: true,
                 label: ajan.settings.on
-                    ? (voice.active ? 'Dinlemeyi durdur' : 'Dinlemeye başla')
-                    : 'Ses kapalı',
+                    ? (voice.active
+                          ? l('Dinlemeyi durdur')
+                          : l('Dinlemeye başla'))
+                    : l('Ses kapalı'),
                 child: MouseRegion(
                   cursor: ajan.settings.on
                       ? SystemMouseCursors.click
@@ -769,7 +789,7 @@ class _JarvisViewState extends State<JarvisView>
             ),
           ),
         );
-    final title = 'Onay: ${ask.title}';
+    final title = l('Onay: {0}', [ask.title]);
     return _box([
       Padding(
         padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
@@ -795,7 +815,7 @@ class _JarvisViewState extends State<JarvisView>
             ),
             const SizedBox(height: 6),
             Text(
-              'Yankı bunu yapmak istiyor:',
+              l('Yankı bunu yapmak istiyor:'),
               style: TextStyle(fontSize: 12, color: _K.muted),
             ),
             const SizedBox(height: 6),
@@ -816,9 +836,9 @@ class _JarvisViewState extends State<JarvisView>
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                button('Vazgeç', AjanApprovals.instance.cancel, main: false),
+                button(l('Vazgeç'), AjanApprovals.instance.cancel, main: false),
                 const SizedBox(width: 10),
-                button('Onayla', AjanApprovals.instance.approve, main: true),
+                button(l('Onayla'), AjanApprovals.instance.approve, main: true),
               ],
             ),
           ],
@@ -843,19 +863,19 @@ class _JarvisViewState extends State<JarvisView>
             runSpacing: 8,
             children: [
               _suggestion(
-                'Bugün neler var?',
+                l('Bugün neler var?'),
                 () => _ask(
-                  'Bugün neler var? Ajandama bak, önce acil olanı söyle.',
+                  l('Bugün neler var? Ajandama bak, önce acil olanı söyle.'),
                 ),
               ),
-              _suggestion('Hava durumu', () => _ask('Bugün hava nasıl?')),
+              _suggestion(l('Hava durumu'), () => _ask(l('Bugün hava nasıl?'))),
               _suggestion(
-                'Haberler',
-                () => _ask('Bugünün önemli haberlerini kısaca özetle.'),
+                l('Haberler'),
+                () => _ask(l('Bugünün önemli haberlerini kısaca özetle.')),
               ),
               _suggestion(
-                'Bilgisayarım nasıl?',
-                () => _ask('Bilgisayarımda bir sorun var mı? Kısaca söyle.'),
+                l('Bilgisayarım nasıl?'),
+                () => _ask(l('Bilgisayarımda bir sorun var mı? Kısaca söyle.')),
               ),
             ],
           ),
@@ -888,34 +908,34 @@ class _JarvisViewState extends State<JarvisView>
                   onSubmitted: (_) => _send(),
                   style: TextStyle(fontSize: 16, color: _K.bright),
                   cursorColor: _K.label,
-                  decoration: const InputDecoration(
-                    hintText: 'Yazın ya da konuşun…',
-                    hintStyle: TextStyle(color: Color(0xFF7D879A)),
+                  decoration: InputDecoration(
+                    hintText: l('Yazın ya da konuşun…'),
+                    hintStyle: const TextStyle(color: Color(0xFF7D879A)),
                     filled: false,
                     isDense: true,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
               const SizedBox(width: 12),
               Text(
                 !voiceOn
-                    ? 'Ses kapalı · Esc arkaya alır'
+                    ? l('Ses kapalı · Esc arkaya alır')
                     : talking
-                    ? '“kapan” deyin ya da Esc'
-                    : 'Mikrofona dokunun ya da Esc',
+                    ? l('“kapan” deyin ya da Esc')
+                    : l('Mikrofona dokunun ya da Esc'),
                 style: TextStyle(fontSize: 12, color: _K.faint),
               ),
               const SizedBox(width: 12),
               Tooltip(
                 message: !voiceOn
-                    ? 'Ses kapalı: Ayarlar › Hızlı arama'
+                    ? l('Ses kapalı: Ayarlar › Hızlı arama')
                     : talking
-                    ? 'Konuşmayı bitir'
-                    : 'Konuşmayı başlat',
+                    ? l('Konuşmayı bitir')
+                    : l('Konuşmayı başlat'),
                 child: Material(
                   color: voiceOn ? _K.s.accent : const Color(0x14FFFFFF),
                   shape: _K.kure

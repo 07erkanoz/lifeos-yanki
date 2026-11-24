@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../l10n/dil.dart' as dil;
 import 'yanki_figures.dart';
 
 /// What Folio Ajan's full screen shows: nothing yet, or one of the voice's
@@ -58,17 +59,26 @@ class AjanMotion {
 /// The full screen's looks, the lawyer's choice (22 Kasım 2026); drawn from
 /// the mock-ups in artifact 6Gdh8XbGpgbyiSLVfPUTzU.
 enum AjanSkin {
-  yanki('Yankı'),
-  ag('Ağ'),
-  dalga('Dalga'),
-  kure('Küre'),
-  reaktor('Reaktör'),
-  hologram('Hologram'),
-  aura('Aura'),
-  kehribar('Kehribar');
+  yanki,
+  ag,
+  dalga,
+  kure,
+  reaktor,
+  hologram,
+  aura,
+  kehribar;
 
-  const AjanSkin(this.label);
-  final String label;
+  /// The look's name, in the language in use.
+  String get label => switch (this) {
+    yanki => 'Yankı',
+    ag => dil.l('Ağ'),
+    dalga => dil.l('Dalga'),
+    kure => dil.l('Küre'),
+    reaktor => dil.l('Reaktör'),
+    hologram => 'Hologram',
+    aura => 'Aura',
+    kehribar => dil.l('Kehribar'),
+  };
 
   static AjanSkin of(String id) =>
       values.firstWhere((s) => s.name == id, orElse: () => yanki);
@@ -659,7 +669,7 @@ class ReactorPainter extends CustomPainter {
 
     final db = (l * 60 + 18).round().toString().padLeft(2, '0');
     _label(
-      'SES $db dB',
+      dil.l('SES {0} dB', [db]),
       c.withValues(alpha: .75),
       11 * u,
     ).paint(canvas, o + Offset(140 * u, -196 * u));
@@ -787,7 +797,7 @@ class GlobePainter extends CustomPainter {
       );
     }
     _label(
-      'AĞ ● CANLI',
+      dil.l('AĞ ● CANLI'),
       c.withValues(alpha: .7),
       10 * u,
     ).paint(canvas, o + Offset(-b, b + 8 * u));

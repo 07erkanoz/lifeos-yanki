@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/dil.dart';
 import '../../services/voice/live_conversation.dart';
 
 /// Folio Ajan's colours: the approved mock-up's tokens ("Birleşik"), dark
@@ -110,13 +111,13 @@ class AjanColors {
 const ajanMono = 'JetBrainsMono';
 
 String liveStateLabel(LiveState s) => switch (s) {
-  LiveState.off => 'Ses kapalı',
-  LiveState.waiting => 'Konuşunca dinlerim',
-  LiveState.connecting => 'Bağlanıyor…',
-  LiveState.listening => 'Dinliyorum',
-  LiveState.thinking => 'Düşünüyorum',
-  LiveState.working => 'Folio’ya bakıyorum',
-  LiveState.speaking => 'Konuşuyorum',
+  LiveState.off => l('Ses kapalı'),
+  LiveState.waiting => l('Konuşunca dinlerim'),
+  LiveState.connecting => l('Bağlanıyor…'),
+  LiveState.listening => l('Dinliyorum'),
+  LiveState.thinking => l('Düşünüyorum'),
+  LiveState.working => l('Folio’ya bakıyorum'),
+  LiveState.speaking => l('Konuşuyorum'),
 };
 
 /// The small blue sphere: Folio Ajan's mark.

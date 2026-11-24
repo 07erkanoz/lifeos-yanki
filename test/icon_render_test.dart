@@ -30,13 +30,17 @@ void main() {
               stops: [0, .6, 1],
             ),
           ),
-          child: CustomPaint(painter: OrbPainter(clock, m), size: const Size(512, 512)),
+          child: CustomPaint(
+            painter: OrbPainter(clock, m),
+            size: const Size(512, 512),
+          ),
         ),
       ),
     );
     if (out == null) return;
     await tester.runAsync(() async {
-      final b = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final b =
+          key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final img = await b.toImage();
       final png = await img.toByteData(format: ui.ImageByteFormat.png);
       await File(out).writeAsBytes(png!.buffer.asUint8List());

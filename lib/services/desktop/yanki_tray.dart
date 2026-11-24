@@ -6,6 +6,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:tray_manager/legacy.dart';
 
+import '../../l10n/dil.dart';
+
 /// Yankı's icon in the system tray (StatusNotifierItem: KDE's panel, or
 /// GNOME with the AppIndicator extension): a click opens it, the menu
 /// opens, floats, sets the wake word or ends it.
@@ -24,13 +26,17 @@ class YankiTray with TrayListener {
   bool _shown = false;
   bool _wake = false;
 
+  /// The language the menu was built in.
+  String? _lang;
+
   bool get shown => _shown;
 
   /// Shown with the wake word's tick as [wake]; nothing when the desktop
   /// has no tray (the window then closes as before).
   Future<void> show({required bool wake}) async {
-    if (_shown && wake == _wake) return;
+    if (_shown && wake == _wake && _lang == Dil.current.value) return;
     _wake = wake;
+    _lang = Dil.current.value;
     try {
       if (!_shown) {
         trayManager.addListener(this);
@@ -41,17 +47,17 @@ class YankiTray with TrayListener {
       await trayManager.setContextMenu(
         Menu(
           items: [
-            MenuItem(key: 'ac', label: 'Yankı’yı aç'),
-            MenuItem(key: 'kure', label: 'Yüzen küre'),
+            MenuItem(key: 'ac', label: l('Yankı’yı aç')),
+            MenuItem(key: 'kure', label: l('Yüzen küre')),
             MenuItem.separator(),
             MenuItem.checkbox(
               key: 'sesle',
-              label: '“Merhaba Yankı” ile aç',
+              label: l('“Merhaba Yankı” ile aç'),
               checked: wake,
             ),
-            MenuItem(key: 'ayar', label: 'Ayarlar'),
+            MenuItem(key: 'ayar', label: l('Ayarlar')),
             MenuItem.separator(),
-            MenuItem(key: 'cik', label: 'Çık'),
+            MenuItem(key: 'cik', label: l('Çık')),
           ],
         ),
       );

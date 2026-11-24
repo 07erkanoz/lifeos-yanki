@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import '../../l10n/dil.dart';
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -95,10 +98,11 @@ class LiveSession {
     ws.listen(
       _take,
       onDone: () => _end(
-        'bağlantı kapandı (${ws.closeCode ?? ''} ${ws.closeReason ?? ''})'
-            .trim(),
+        l('bağlantı kapandı ({0})', [
+          '${ws.closeCode ?? ''} ${ws.closeReason ?? ''}'.trim(),
+        ]),
       ),
-      onError: (Object e) => _end('bağlantı hatası: $e'),
+      onError: (Object e) => _end(l('bağlantı hatası: {0}', [e])),
       cancelOnError: true,
     );
     _send(

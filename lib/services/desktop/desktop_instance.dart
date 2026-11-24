@@ -6,6 +6,7 @@ import 'dart:math';
 
 import 'package:ffi/ffi.dart';
 
+import '../../l10n/dil.dart';
 import '../platform/app_directories.dart';
 import '../platform/atomic_file.dart';
 
@@ -23,10 +24,10 @@ class DesktopInstance {
               Int32 Function(IntPtr, Pointer<Utf16>, Pointer<Utf16>, Uint32),
               int Function(int, Pointer<Utf16>, Pointer<Utf16>, int)
             >('MessageBoxW');
-        final text =
-            '$message Görev Yöneticisi\'nden LifeOS Folio\'yu '
-                    'kapatıp yeniden açın.'
-                .toNativeUtf16();
+        final text = l(
+          '{0} Görev Yöneticisi\'nden LifeOS Folio\'yu kapatıp yeniden açın.',
+          [message],
+        ).toNativeUtf16();
         final title = 'LifeOS Folio'.toNativeUtf16();
         // MB_OK | MB_ICONWARNING
         box(0, text, title, 0x30);
@@ -101,7 +102,7 @@ class DesktopInstance {
       // Owner may still be starting. Retry only transport, never document work.
       if (await send(arguments, directory: dir, tries: 20)) return null;
       throw StateError(
-        'LifeOS Folio arka planda çalışıyor ancak yanıt vermiyor.',
+        l('LifeOS Folio arka planda çalışıyor ancak yanıt vermiyor.'),
       );
     }
     try {

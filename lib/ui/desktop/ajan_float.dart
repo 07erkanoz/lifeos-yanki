@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/dil.dart';
 import '../../services/voice/folio_ajan.dart';
 import '../../services/voice/live_conversation.dart';
 import 'ajan_theme.dart';
@@ -42,7 +43,7 @@ class AjanVoicePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: Listenable.merge([ajan, ajanFloatOpen]),
+    listenable: Listenable.merge([ajan, ajanFloatOpen, Dil.current]),
     builder: (context, _) {
       if (!ajan.available || !ajan.settings.on) return const SizedBox.shrink();
       final c = AjanColors.of(context, null);
@@ -51,10 +52,10 @@ class AjanVoicePill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 6),
         child: Tooltip(
           message: on
-              ? 'Konuşmayı bitir'
+              ? l('Konuşmayı bitir')
               : onOpen != null
-              ? 'Folio Ajan’ı aç'
-              : 'Folio Ajan ile sesli konuş',
+              ? l('Folio Ajan’ı aç')
+              : l('Folio Ajan ile sesli konuş'),
           child: Material(
             color: on ? c.accentFill : c.surface,
             shape: StadiumBorder(
@@ -127,6 +128,7 @@ class _AjanFloatState extends State<AjanFloat> {
   void initState() {
     super.initState();
     ajan.addListener(_changed);
+    Dil.current.addListener(_changed);
   }
 
   /// The conversation ended by itself ("kapan", or quiet for long): the
@@ -148,6 +150,7 @@ class _AjanFloatState extends State<AjanFloat> {
   void dispose() {
     _closing?.cancel();
     ajan.removeListener(_changed);
+    Dil.current.removeListener(_changed);
     super.dispose();
   }
 
@@ -159,18 +162,18 @@ class _AjanFloatState extends State<AjanFloat> {
       if (l.who == 'bilgi' && l.text.trim().isNotEmpty) return l.text.trim();
     }
     return switch (voice.state) {
-      LiveState.connecting => 'Bağlanıyor…',
-      LiveState.off => 'Konuşma kapalı.',
-      _ => 'Dinliyorum. Sorunuzu söyleyin.',
+      LiveState.connecting => l('Bağlanıyor…'),
+      LiveState.off => l('Konuşma kapalı.'),
+      _ => l('Dinliyorum. Sorunuzu söyleyin.'),
     };
   }
 
   String get _state => switch (ajan.voice.state) {
-    LiveState.speaking => 'konuşuyor',
-    LiveState.listening || LiveState.waiting => 'dinliyor',
-    LiveState.thinking || LiveState.working => 'bakıyor',
-    LiveState.connecting => 'bağlanıyor',
-    LiveState.off => 'kapalı',
+    LiveState.speaking => l('konuşuyor'),
+    LiveState.listening || LiveState.waiting => l('dinliyor'),
+    LiveState.thinking || LiveState.working => l('bakıyor'),
+    LiveState.connecting => l('bağlanıyor'),
+    LiveState.off => l('kapalı'),
   };
 
   void _close() {
@@ -249,10 +252,10 @@ class _AjanFloatState extends State<AjanFloat> {
                         if (widget.onFull != null)
                           icon(
                             Icons.open_in_full_rounded,
-                            'Folio Ajan tam ekran (konuşma sürer)',
+                            l('Folio Ajan tam ekran (konuşma sürer)'),
                             widget.onFull,
                           ),
-                        icon(Icons.close_rounded, 'Konuşmayı bitir', _close),
+                        icon(Icons.close_rounded, l('Konuşmayı bitir'), _close),
                       ],
                     ),
                   ),
@@ -282,7 +285,7 @@ class _AjanFloatState extends State<AjanFloat> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                     child: Text(
-                      '“kapan” deyin ya da Esc',
+                      l('“kapan” deyin ya da Esc'),
                       style: TextStyle(fontSize: 11, color: c.faint),
                     ),
                   ),

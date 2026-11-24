@@ -37,8 +37,10 @@ class Autostart {
     await own.writeAsString(
       '[Desktop Entry]\n'
       'Type=Application\n'
-      'Name=LifeOS Yankı (arka planda)\n'
-      'Comment=Oturum açılınca tepside durur ve uyandırma sözünü dinler\n'
+      'Name=LifeOS Yankı (background)\n'
+      'Name[tr]=LifeOS Yankı (arka planda)\n'
+      'Comment=Waits in the tray and listens for the wake word\n'
+      'Comment[tr]=Oturum açılınca tepside durur ve uyandırma sözünü dinler\n'
       'Exec=lifeos-yanki --arka\n'
       'Icon=tr.com.lifeos.Yanki\n'
       'Terminal=false\n'

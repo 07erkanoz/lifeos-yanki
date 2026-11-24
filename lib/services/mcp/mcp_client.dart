@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '../../l10n/dil.dart';
 import 'mcp_servers.dart';
 
 /// One MCP server's tools for Yankı's voice, run over standard input and
@@ -112,7 +113,7 @@ class McpClient {
           p.exitCode.then((code) {
             if (identical(_process, p)) {
               final said = err.toString().trim();
-              lastError = said.isEmpty ? 'çıktı ($code)' : said;
+              lastError = said.isEmpty ? l('çıktı ({0})', [code]) : said;
               _reset();
             }
           }),
@@ -273,7 +274,7 @@ class McpClient {
         if (value != null && '$value'.isNotEmpty)
           '$key: ${value is String ? value : jsonEncode(value)}',
     ];
-    return lines.isEmpty ? 'Ek bilgi yok.' : lines.join('\n');
+    return lines.isEmpty ? l('Ek bilgi yok.') : lines.join('\n');
   }
 
   /// Started and asked for its tools once: whether it answers, and how

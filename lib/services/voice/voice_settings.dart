@@ -25,7 +25,11 @@ class VoiceSettings {
     this.city = '',
     this.tray = true,
     this.voiceClose = true,
+    this.language = 'sistem',
   });
+
+  /// Yankı's language: 'sistem' (the computer's), 'tr' or 'en'.
+  final String language;
 
   /// Yankı stays in the system tray when its window closes, even with the
   /// wake word off; its menu opens it again.
@@ -75,6 +79,7 @@ class VoiceSettings {
           city: '${json['sehir'] ?? ''}',
           tray: json['tepside'] != false,
           voiceClose: json['sesle_kapat'] != false,
+          language: '${json['dil'] ?? 'sistem'}',
         )
       : const VoiceSettings();
 
@@ -91,6 +96,7 @@ class VoiceSettings {
     'sehir': city,
     'tepside': tray,
     'sesle_kapat': voiceClose,
+    'dil': language,
   };
 
   VoiceSettings copyWith({
@@ -106,6 +112,7 @@ class VoiceSettings {
     String? city,
     bool? tray,
     bool? voiceClose,
+    String? language,
   }) => VoiceSettings(
     on: on ?? this.on,
     headphones: headphones ?? this.headphones,
@@ -119,6 +126,7 @@ class VoiceSettings {
     city: city ?? this.city,
     tray: tray ?? this.tray,
     voiceClose: voiceClose ?? this.voiceClose,
+    language: language ?? this.language,
   );
 
   static Future<File> Function() file = () async =>

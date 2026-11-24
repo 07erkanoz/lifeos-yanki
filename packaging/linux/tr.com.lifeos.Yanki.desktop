@@ -1,11 +1,14 @@
 [Desktop Entry]
 Type=Application
 Name=LifeOS Yankı
-GenericName=Sesli ajan
-Comment=LifeOS'un sesli yapay zekâ ajanı
+GenericName=Voice assistant
+GenericName[tr]=Sesli asistan
+Comment=LifeOS's voice AI assistant
+Comment[tr]=LifeOS'un sesli yapay zekâ asistanı
 Exec=lifeos-yanki %U
 Icon=tr.com.lifeos.Yanki
 StartupWMClass=tr.com.lifeos.Yanki
 Terminal=false
 Categories=Utility;
-Keywords=yankı;ses;ajan;asistan;yapay zekâ;
+Keywords=voice;assistant;agent;ai;mcp;
+Keywords[tr]=yankı;ses;ajan;asistan;yapay zekâ;mcp;

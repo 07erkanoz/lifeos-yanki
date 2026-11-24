@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'l10n/dil.dart';
 import 'services/ai/ai_assistant.dart';
 import 'services/desktop/desktop_instance.dart';
 import 'services/desktop/global_shortcut.dart';
@@ -43,7 +44,7 @@ Future<void> runAjanApp(List<String> arguments) async {
     );
   } on StateError {
     DesktopInstance.tellStuck(
-      'LifeOS Yankı açık görünüyor ama yanıt vermiyor.',
+      l('LifeOS Yankı açık görünüyor ama yanıt vermiyor.'),
     );
     exit(1);
   }
@@ -128,6 +129,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     // there is nothing to listen for, and Yankı ends.
     unawaited(() async {
       await ajan.loadVoiceSettings();
+      Dil.set(ajan.settings.language);
       await _followTray();
       if (widget.hidden && _mode == _Mode.hidden && !_stays) await _quit();
     }());
@@ -172,6 +174,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
   }
 
   void _followWake() {
+    Dil.set(ajan.settings.language);
     unawaited(_followTray());
     final wake = WakeWord.instance;
     if (!_wantWake) {
@@ -370,7 +373,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: appearance,
+    listenable: Listenable.merge([appearance, Dil.current]),
     builder: (context, _) => MaterialApp(
       title: 'LifeOS Yankı',
       navigatorKey: _navigator,
@@ -385,7 +388,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('tr', 'TR'), Locale('en', 'US')],
-      locale: const Locale('tr', 'TR'),
+      locale: Dil.en ? const Locale('en', 'US') : const Locale('tr', 'TR'),
       home: switch (_mode) {
         _Mode.hidden => const SizedBox.shrink(),
         _Mode.full => JarvisView(

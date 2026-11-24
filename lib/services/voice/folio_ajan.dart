@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 
+import '../../l10n/dil.dart';
 import '../ai/ai_assistant.dart';
 import '../mcp/mcp_client.dart';
 import '../mcp/mcp_servers.dart';
@@ -50,14 +51,14 @@ class AjanBrief {
   /// One sentence for the top of the screen.
   String get summary {
     final parts = [
-      if (hearings.isNotEmpty) '${hearings.length} duruşma',
+      if (hearings.isNotEmpty) l('{0} duruşma', [hearings.length]),
       if (deadlines.any((d) => d.urgent))
-        '${deadlines.where((d) => d.urgent).length} yakın süre',
-      if (incoming.isNotEmpty) '${incoming.length} yeni gelen',
-      if (tasks.isNotEmpty) '${tasks.length} açık görev',
+        l('{0} yakın süre', [deadlines.where((d) => d.urgent).length]),
+      if (incoming.isNotEmpty) l('{0} yeni gelen', [incoming.length]),
+      if (tasks.isNotEmpty) l('{0} açık görev', [tasks.length]),
     ];
     return parts.isEmpty
-        ? 'Bugün için kayıtlı bir şey yok.'
+        ? l('Bugün için kayıtlı bir şey yok.')
         : '${parts.join(', ')}.';
   }
 
@@ -381,8 +382,13 @@ class FolioAjan extends ChangeNotifier {
     'xhigh': 'Çok yüksek',
   };
 
-  String get effortLabel =>
-      effortNames[settings.codexEffort] ?? settings.codexEffort;
+  String get effortLabel => switch (settings.codexEffort) {
+    'low' => l('Düşük'),
+    'medium' => l('Orta'),
+    'high' => l('Yüksek'),
+    'xhigh' => l('Çok yüksek'),
+    final other => other,
+  };
 
   Future<void> nextEffort() {
     final i = efforts.indexOf(settings.codexEffort);
@@ -429,7 +435,7 @@ class FolioAjan extends ChangeNotifier {
     try {
       brief = await AjanBrief.load();
     } catch (e) {
-      briefError = 'Brifing okunamadı: $e';
+      briefError = l('Brifing okunamadı: {0}', [e]);
     } finally {
       briefLoading = false;
       notifyListeners();

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_recorder/flutter_recorder.dart';
 import 'package:flutter_soloud/flutter_soloud.dart';
 
+import '../../l10n/dil.dart';
 import '../platform/app_directories.dart';
 
 import 'live_audio.dart';
@@ -91,14 +92,16 @@ class WakeWord {
         await File('$path${sep}am${sep}final.mdl').exists()) {
       return path;
     }
-    message.value = 'Türkçe ses modeli indiriliyor…';
+    message.value = l('Türkçe ses modeli indiriliyor…');
     final zip = File('${d.path}$sep$_model.zip');
     final client = HttpClient();
     try {
       final request = await client.getUrl(Uri.parse(_modelUrl));
       final response = await request.close();
       if (response.statusCode != 200) {
-        throw Exception('model indirilemedi (HTTP ${response.statusCode})');
+        throw Exception(
+          l('model indirilemedi (HTTP {0})', [response.statusCode]),
+        );
       }
       final total = response.contentLength;
       var got = 0;
@@ -107,21 +110,22 @@ class WakeWord {
         sink.add(part);
         got += part.length;
         if (total > 0) {
-          message.value =
-              'Türkçe ses modeli indiriliyor… %${(got * 100 / total).floor()}';
+          message.value = l('Türkçe ses modeli indiriliyor… %{0}', [
+            (got * 100 / total).floor(),
+          ]);
         }
       }
       await sink.close();
     } finally {
       client.close();
     }
-    message.value = 'Model denetleniyor…';
+    message.value = l('Model denetleniyor…');
     final digest = await sha256.bind(zip.openRead()).first;
     if ('$digest' != _modelSha256) {
       await zip.delete();
-      throw Exception('İnen ses modeli beklenen dosya değil; açılmadı.');
+      throw Exception(l('İnen ses modeli beklenen dosya değil; açılmadı.'));
     }
-    message.value = 'Model açılıyor…';
+    message.value = l('Model açılıyor…');
     await extractFileToDisk(zip.path, d.path);
     await zip.delete();
     return path;
@@ -135,7 +139,9 @@ class WakeWord {
     final v = Vosk.load();
     if (v == null) {
       state.value = WakeState.unsupported;
-      message.value = 'Bu derlemede sesle açma yok (Vosk kitaplığı bulunamadı)';
+      message.value = l(
+        'Bu derlemede sesle açma yok (Vosk kitaplığı bulunamadı)',
+      );
       return;
     }
     state.value = WakeState.preparing;
@@ -197,13 +203,13 @@ class WakeWord {
       // Nothing from the microphone after a few seconds: said, not silent.
       Timer(const Duration(seconds: 4), () {
         if (state.value == WakeState.listening && _pieces == 0) {
-          message.value = 'Mikrofondan ses gelmiyor.';
+          message.value = l('Mikrofondan ses gelmiyor.');
           unawaited(_log('mikrofondan ses gelmiyor'));
         }
       });
     } catch (e) {
       state.value = WakeState.failed;
-      message.value = 'Mikrofon açılamadı: $e';
+      message.value = l('Mikrofon açılamadı: {0}', [e]);
       unawaited(_log('mikrofon açılamadı: $e'));
     }
   }

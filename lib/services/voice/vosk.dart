@@ -10,6 +10,8 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
+import '../../l10n/dil.dart';
+
 typedef _ModelNewC = Pointer<Void> Function(Pointer<Utf8>);
 typedef _RecNewC = Pointer<Void> Function(Pointer<Void>, Float, Pointer<Utf8>);
 typedef _RecNewD = Pointer<Void> Function(Pointer<Void>, double, Pointer<Utf8>);
@@ -75,7 +77,9 @@ class Vosk {
     final p = path.toNativeUtf8();
     try {
       final m = _modelNew(p);
-      if (m == nullptr) throw Exception('Vosk modeli açılamadı: $path');
+      if (m == nullptr) {
+        throw Exception(l('Vosk modeli açılamadı: {0}', [path]));
+      }
       return m;
     } finally {
       malloc.free(p);
@@ -93,7 +97,7 @@ class Vosk {
     final g = jsonEncode([...phrases, '[unk]']).toNativeUtf8();
     try {
       final r = _recNew(model, rate.toDouble(), g);
-      if (r == nullptr) throw Exception('Vosk tanıyıcısı açılamadı');
+      if (r == nullptr) throw Exception(l('Vosk tanıyıcısı açılamadı'));
       _words(r, 1); // a confidence for each word of a final result
       return VoskRecognizer._(this, r);
     } finally {

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:dbus/dbus.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/dil.dart';
+
 class FolioShortcut {
   final String key;
   final int modifiers;
@@ -122,7 +124,9 @@ class GlobalShortcut {
           if (event.values[0].asUint32() == 0) {
             done.complete(event.values[1].asStringVariantDict());
           } else {
-            done.completeError(StateError('Masaüstü kısayol izni verilmedi.'));
+            done.completeError(
+              StateError(l('Masaüstü kısayol izni verilmedi.')),
+            );
           }
         });
     try {
@@ -235,7 +239,7 @@ class GlobalShortcut {
           DBusStruct([
             const DBusString('search'),
             DBusDict.stringVariant({
-              'description': const DBusString('LifeOS Folio hızlı arama'),
+              'description': DBusString(l('LifeOS Folio hızlı arama')),
               'preferred_trigger': DBusString(shortcut.trigger),
             }),
           ]),
@@ -252,7 +256,7 @@ class GlobalShortcut {
       ]);
       final bound = result['shortcuts'];
       if (bound == null || bound.asArray().isEmpty) {
-        throw StateError('Kısayol atanmadı.');
+        throw StateError(l('Kısayol atanmadı.'));
       }
       String? label;
       for (final value in bound.asArray()) {
@@ -267,7 +271,10 @@ class GlobalShortcut {
       }
       if (label == null || label.trim().isEmpty) {
         throw StateError(
-          'Masaüstü bir tuş birleşimi atamadı. Kısayol izninde tuşları seçin.',
+          l(
+            'Masaüstü bir tuş birleşimi atamadı. Kısayol izninde tuşları '
+            'seçin.',
+          ),
         );
       }
       return label;

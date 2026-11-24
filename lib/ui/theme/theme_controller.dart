@@ -4,17 +4,21 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
+import '../../l10n/dil.dart';
 import '../../services/platform/app_directories.dart';
 
 /// How the library's panel opens: by the window and the page, or always
 /// open, or always folded to its icons.
 enum PanelMode {
-  auto('Otomatik'),
-  open('Hep açık'),
-  folded('Hep dar');
+  auto,
+  open,
+  folded;
 
-  const PanelMode(this.label);
-  final String label;
+  String get label => switch (this) {
+    auto => l('Otomatik'),
+    open => l('Hep açık'),
+    folded => l('Hep dar'),
+  };
 }
 
 class ThemeController extends ChangeNotifier {
@@ -34,11 +38,11 @@ class ThemeController extends ChangeNotifier {
   double textScale = 1;
 
   /// The sizes offered, smallest first.
-  static const textScales = [
-    (0.85, 'Çok küçük'),
-    (0.92, 'Küçük'),
-    (1.0, 'Normal'),
-    (1.1, 'Büyük'),
+  static List<(double, String)> get textScales => [
+    (0.85, l('Çok küçük')),
+    (0.92, l('Küçük')),
+    (1.0, l('Normal')),
+    (1.1, l('Büyük')),
   ];
   bool _disposed = false;
   int _revision = 0;

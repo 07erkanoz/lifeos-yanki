@@ -4,6 +4,7 @@ import '../../services/desktop/autostart.dart';
 
 import 'package:flutter/material.dart';
 
+import '../../l10n/dil.dart';
 import '../../services/ai/ai_assistant.dart';
 import '../../services/ai/ai_keys.dart';
 import '../../services/mcp/mcp_client.dart';
@@ -41,6 +42,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
   void initState() {
     super.initState();
     ajan.addListener(_changed);
+    Dil.current.addListener(_changed);
     McpServers.instance.addListener(_changed);
     _city.text = ajan.settings.city;
     unawaited(McpServers.instance.load(again: true));
@@ -61,6 +63,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
   @override
   void dispose() {
     ajan.removeListener(_changed);
+    Dil.current.removeListener(_changed);
     McpServers.instance.removeListener(_changed);
     _city.dispose();
     _gemini.dispose();
@@ -93,42 +96,72 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: _ground,
-          title: const Text('Yankı · Ayarlar'),
+          title: Text(l('Yankı · Ayarlar')),
         ),
         body: ListView(
           padding: const EdgeInsets.fromLTRB(32, 8, 32, 48),
           children: [
-            _section('Ses', [
+            _section(l('Genel'), [
+              _row(
+                l('Dil'),
+                l('Ekranların ve Yankı’nın dili.'),
+                DropdownButton<String>(
+                  value: const {'tr', 'en'}.contains(s.language)
+                      ? s.language
+                      : 'sistem',
+                  dropdownColor: _panel,
+                  underline: const SizedBox.shrink(),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'sistem',
+                      child: Text(l('Sistem dili')),
+                    ),
+                    const DropdownMenuItem(value: 'tr', child: Text('Türkçe')),
+                    const DropdownMenuItem(value: 'en', child: Text('English')),
+                  ],
+                  onChanged: (v) => v == null
+                      ? null
+                      : ajan.saveSettings(s.copyWith(language: v)),
+                ),
+              ),
+            ]),
+            _section(l('Ses'), [
               _switch(
-                'Sesli ajan',
-                'Kapalıyken Yankı konuşmaz ve dinlemez.',
+                l('Sesli ajan'),
+                l('Kapalıyken Yankı konuşmaz ve dinlemez.'),
                 s.on,
                 (v) => ajan.saveSettings(s.copyWith(on: v)),
               ),
               _switch(
-                'Sesle aç',
-                '“Merhaba Yankı” ya da “Yankı açıl” denince açılır. Bu '
-                    'bilgisayarda tanınır (Vosk), hiçbir şey dışarı gitmez.',
+                l('Sesle aç'),
+                l(
+                  '“Merhaba Yankı” ya da “Yankı açıl” denince açılır. Bu '
+                  'bilgisayarda tanınır (Vosk), hiçbir şey dışarı gitmez.',
+                ),
                 s.wake,
                 (v) => ajan.saveSettings(s.copyWith(wake: v)),
               ),
               _switch(
-                'Sesle kapat',
-                '“Kapan”, “görüşürüz”, “teşekkürler” denince konuşma biter '
-                    've pencere de kapanır (tepsiye ya da dinlemeye döner).',
+                l('Sesle kapat'),
+                l(
+                  '“Kapan”, “görüşürüz”, “teşekkürler” denince konuşma biter '
+                  've pencere de kapanır (tepsiye ya da dinlemeye döner).',
+                ),
                 s.voiceClose,
                 (v) => ajan.saveSettings(s.copyWith(voiceClose: v)),
               ),
               _switch(
-                'Kulaklık',
-                'Yankı konuşurken araya girilebilir; ses mikrofona geri '
-                    'dönmez.',
+                l('Kulaklık'),
+                l(
+                  'Yankı konuşurken araya girilebilir; ses mikrofona geri '
+                  'dönmez.',
+                ),
                 s.headphones,
                 (v) => ajan.saveSettings(s.copyWith(headphones: v)),
               ),
               _row(
-                'Görünüm',
-                'Tam ekranın figürü.',
+                l('Görünüm'),
+                l('Tam ekranın figürü.'),
                 DropdownButton<String>(
                   value: AjanSkin.of(s.skin).name,
                   dropdownColor: _panel,
@@ -141,8 +174,8 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 ),
               ),
               _row(
-                'Şehir',
-                'Hava durumu için (ör. Kadıköy/İstanbul).',
+                l('Şehir'),
+                l('Hava durumu için (ör. Kadıköy/İstanbul).'),
                 SizedBox(
                   width: 240,
                   child: TextField(
@@ -163,18 +196,22 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 ),
               ),
             ]),
-            _section('Masaüstü', [
+            _section(l('Masaüstü'), [
               _switch(
-                'Sistem tepsisinde kal',
-                'Pencere kapanınca Yankı tepside durur; simgeye tıklayınca '
-                    'açılır, menüsünden küre, ayarlar ve çıkış seçilir.',
+                l('Sistem tepsisinde kal'),
+                l(
+                  'Pencere kapanınca Yankı tepside durur; simgeye tıklayınca '
+                  'açılır, menüsünden küre, ayarlar ve çıkış seçilir.',
+                ),
                 s.tray,
                 (v) => ajan.saveSettings(s.copyWith(tray: v)),
               ),
               _switch(
-                'Oturum açılınca başla',
-                'Pencere açmadan başlar: tepside durur, “Sesle aç” açıksa '
-                    'uyandırma sözünü dinler.',
+                l('Oturum açılınca başla'),
+                l(
+                  'Pencere açmadan başlar: tepside durur, “Sesle aç” açıksa '
+                  'uyandırma sözünü dinler.',
+                ),
                 _autostart ?? false,
                 (v) async {
                   setState(() => _autostart = v);
@@ -182,21 +219,25 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 },
               ),
             ]),
-            _section('Programlar', [
+            _section(l('Programlar'), [
               for (final p in _programs ?? const <AiStatus>[])
                 _row(
                   p.provider.label,
                   p.provider == AiProvider.codex
-                      ? 'Ana ses (ChatGPT aboneliğiyle). Kurmak için: '
-                            'npm i -g @openai/codex, sonra codex login.'
-                      : 'Ağır işler (Claude Code). Kurmak için: '
-                            'npm i -g @anthropic-ai/claude-code, sonra claude.',
+                      ? l(
+                          'Ana ses (ChatGPT aboneliğiyle). Kurmak için: '
+                          'npm i -g @openai/codex, sonra codex login.',
+                        )
+                      : l(
+                          'Ağır işler (Claude Code). Kurmak için: '
+                          'npm i -g @anthropic-ai/claude-code, sonra claude.',
+                        ),
                   _badge(
                     p.usable
-                        ? 'Hazır'
+                        ? l('Hazır')
                         : p.path == null
-                        ? 'Kurulu değil'
-                        : 'Oturum açık değil',
+                        ? l('Kurulu değil')
+                        : l('Oturum açık değil'),
                     p.usable,
                   ),
                 ),
@@ -206,12 +247,16 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                   child: LinearProgressIndicator(),
                 ),
               _row(
-                'Gemini anahtarı',
+                l('Gemini anahtarı'),
                 _geminiKept
-                    ? 'Anahtar masaüstünün anahtarlığında. Codex yoksa ses '
-                          'Gemini Live ile konuşur.'
-                    : 'Codex yoksa ses Gemini Live ile konuşur; anahtar '
-                          'masaüstünün anahtarlığında saklanır.',
+                    ? l(
+                        'Anahtar masaüstünün anahtarlığında. Codex yoksa ses '
+                        'Gemini Live ile konuşur.',
+                      )
+                    : l(
+                        'Codex yoksa ses Gemini Live ile konuşur; anahtar '
+                        'masaüstünün anahtarlığında saklanır.',
+                      ),
                 SizedBox(
                   width: 300,
                   child: TextField(
@@ -219,7 +264,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                     obscureText: true,
                     decoration: InputDecoration(
                       isDense: true,
-                      hintText: _geminiKept ? '•••••••• (kayıtlı)' : 'AIza…',
+                      hintText: _geminiKept ? l('•••••••• (kayıtlı)') : 'AIza…',
                     ),
                     onSubmitted: (v) async {
                       final ok = await GroqChat.setKey(ApiService.gemini, v);
@@ -232,28 +277,29 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
               ),
             ]),
             _section(
-              'MCP sunucuları',
+              l('MCP sunucuları'),
               [
                 for (final m in McpServers.instance.all) _server(m),
                 if (McpServers.instance.all.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(16),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
                     child: Text(
-                      'Henüz sunucu yok.',
-                      style: TextStyle(color: _muted),
+                      l('Henüz sunucu yok.'),
+                      style: const TextStyle(color: _muted),
                     ),
                   ),
               ],
               action: FilledButton.tonalIcon(
                 onPressed: () => _edit(null),
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Sunucu ekle'),
+                label: Text(l('Sunucu ekle')),
               ),
-              note:
-                  'Yankı’nın sesi ve Claude bu sunucuların araçlarını '
-                  'kullanır. Değişiklik yapan bir araç, “onay iste” açıksa, '
-                  'çalışmadan önce ekranda onayını ister. Claude yalnız '
-                  'okuyan araçları kullanabilir.',
+              note: l(
+                'Yankı’nın sesi ve Claude bu sunucuların araçlarını '
+                'kullanır. Değişiklik yapan bir araç, “onay iste” açıksa, '
+                'çalışmadan önce ekranda onayını ister. Claude yalnız '
+                'okuyan araçları kullanabilir.',
+              ),
             ),
           ],
         ),
@@ -267,8 +313,8 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
     final said = probe == null
         ? null
         : probe.$2 == null
-        ? '${probe.$1} araç'
-        : 'Yanıt yok: ${probe.$2}';
+        ? l('{0} araç', [probe.$1])
+        : l('Yanıt yok: {0}', [probe.$2]);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
@@ -307,7 +353,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      probing ? 'Deneniyor…' : said!,
+                      probing ? l('Deneniyor…') : said!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -322,18 +368,18 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
             ),
           ),
           IconButton(
-            tooltip: 'Dene',
+            tooltip: l('Dene'),
             onPressed: probing ? null : () => _probe(m),
             icon: const Icon(Icons.play_circle_outline_rounded),
           ),
           if (!m.builtIn) ...[
             IconButton(
-              tooltip: 'Düzenle',
+              tooltip: l('Düzenle'),
               onPressed: () => _edit(m),
               icon: const Icon(Icons.edit_outlined),
             ),
             IconButton(
-              tooltip: 'Sil',
+              tooltip: l('Sil'),
               onPressed: () => _remove(m),
               icon: const Icon(Icons.delete_outline_rounded),
             ),
@@ -351,16 +397,16 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
     final yes = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
-        title: Text('${m.name} silinsin mi?'),
-        content: const Text('Yankı bu sunucunun araçlarını artık kullanmaz.'),
+        title: Text(l('{0} silinsin mi?', [m.name])),
+        content: Text(l('Yankı bu sunucunun araçlarını artık kullanmaz.')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
-            child: const Text('Vazgeç'),
+            child: Text(l('Vazgeç')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Sil'),
+            child: Text(l('Sil')),
           ),
         ],
       ),
@@ -528,18 +574,19 @@ class _ServerDialogState extends State<_ServerDialog> {
     final parts = split(_command.text.trim());
     if (!McpServerConfig.validId(id)) {
       return setState(
-        () => _error =
-            'Kısa ad küçük harfle başlamalı; yalnız a-z, 0-9 ve _ (2-24).',
+        () => _error = l(
+          'Kısa ad küçük harfle başlamalı; yalnız a-z, 0-9 ve _ (2-24).',
+        ),
       );
     }
     if (id == McpServers.folioId || id == McpServers.lifeosId) {
-      return setState(() => _error = 'Bu ad LifeOS’a ayrılmış.');
+      return setState(() => _error = l('Bu ad LifeOS’a ayrılmış.'));
     }
     if (widget.server == null &&
         McpServers.instance.all.any((s) => s.id == id)) {
-      return setState(() => _error = 'Bu adla bir sunucu var.');
+      return setState(() => _error = l('Bu adla bir sunucu var.'));
     }
-    if (parts.isEmpty) return setState(() => _error = 'Komut boş.');
+    if (parts.isEmpty) return setState(() => _error = l('Komut boş.'));
     final env = <String, String>{};
     for (final l in _env.text.split('\n')) {
       final i = l.indexOf('=');
@@ -563,7 +610,7 @@ class _ServerDialogState extends State<_ServerDialog> {
   Widget build(BuildContext context) => AlertDialog(
     backgroundColor: _panel,
     title: Text(
-      widget.server == null ? 'MCP sunucusu ekle' : 'Sunucuyu düzenle',
+      widget.server == null ? l('MCP sunucusu ekle') : l('Sunucuyu düzenle'),
     ),
     content: SizedBox(
       width: 520,
@@ -574,26 +621,28 @@ class _ServerDialogState extends State<_ServerDialog> {
           TextField(
             controller: _id,
             enabled: widget.server == null,
-            decoration: const InputDecoration(
-              labelText: 'Kısa ad',
-              helperText: 'Araçların öneki olur: github → github_…',
+            decoration: InputDecoration(
+              labelText: l('Kısa ad'),
+              helperText: l('Araçların öneki olur: github → github_…'),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _name,
-            decoration: const InputDecoration(labelText: 'Görünen ad'),
+            decoration: InputDecoration(labelText: l('Görünen ad')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _command,
             style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 13),
-            decoration: const InputDecoration(
-              labelText: 'Komut',
-              hintText:
-                  'npx -y @modelcontextprotocol/server-filesystem ~/Belgeler',
-              helperText:
-                  'Standart giriş/çıkışla (stdio) konuşan bir MCP sunucusu.',
+            decoration: InputDecoration(
+              labelText: l('Komut'),
+              hintText: l(
+                'npx -y @modelcontextprotocol/server-filesystem ~/Belgeler',
+              ),
+              helperText: l(
+                'Standart giriş/çıkışla (stdio) konuşan bir MCP sunucusu.',
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -602,11 +651,12 @@ class _ServerDialogState extends State<_ServerDialog> {
             minLines: 2,
             maxLines: 4,
             style: const TextStyle(fontFamily: 'JetBrainsMono', fontSize: 13),
-            decoration: const InputDecoration(
-              labelText: 'Ortam değişkenleri (isteğe bağlı)',
+            decoration: InputDecoration(
+              labelText: l('Ortam değişkenleri (isteğe bağlı)'),
               hintText: 'GITHUB_TOKEN=…',
-              helperText:
-                  'Her satıra bir AD=değer. mcp.json dosyasında saklanır.',
+              helperText: l(
+                'Her satıra bir AD=değer. mcp.json dosyasında saklanır.',
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -614,7 +664,7 @@ class _ServerDialogState extends State<_ServerDialog> {
             contentPadding: EdgeInsets.zero,
             value: _approve,
             onChanged: (v) => setState(() => _approve = v),
-            title: const Text('Değişiklik yapan araçlar için onay iste'),
+            title: Text(l('Değişiklik yapan araçlar için onay iste')),
           ),
           if (_error != null)
             Text(_error!, style: const TextStyle(color: Color(0xFFF87171))),
@@ -624,9 +674,9 @@ class _ServerDialogState extends State<_ServerDialog> {
     actions: [
       TextButton(
         onPressed: () => Navigator.pop(context),
-        child: const Text('Vazgeç'),
+        child: Text(l('Vazgeç')),
       ),
-      FilledButton(onPressed: _save, child: const Text('Kaydet')),
+      FilledButton(onPressed: _save, child: Text(l('Kaydet'))),
     ],
   );
 }

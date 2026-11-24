@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../l10n/dil.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '../ai/ai_keys.dart';
@@ -171,6 +173,18 @@ class LiveConversation extends ChangeNotifier implements AjanVoice {
   static const _mostSameSession = 3;
   static const _contextLines = 8, _contextChars = 300;
 
+  static const instructionEn =
+      'You are Yankı: LifeOS’s voice assistant on the user’s computer. '
+      'Always speak English, briefly, naturally and politely. Answer with '
+      'the tools; never make things up, and when the tools you have are not '
+      'enough, search first with ${FolioLiveTools.findTool}. Hand heavy work '
+      'such as drafting a petition or a long review to '
+      '${FolioLiveTools.brainTool}. While a tool runs, say something short '
+      'like “let me check”, and sum up the result in one to three sentences. '
+      'Do not guess the details of a summary; ask with '
+      '${FolioLiveTools.askText}. The notes below are in Turkish; follow '
+      'them, but always answer in English.';
+
   static const instruction =
       'Sen Yankı’sın: LifeOS’un, kullanıcının bilgisayarındaki sesli '
       'yardımcısısın. Türkçe, kısa ve doğal konuş; “siz” diye hitap et. '
@@ -302,8 +316,10 @@ class LiveConversation extends ChangeNotifier implements AjanVoice {
   Future<LiveSession> _connect() async {
     final key = await _key();
     if (key == null || key.isEmpty) {
-      throw const LiveFailure(
-        'Gemini anahtarı yok. Ayarlar › Yapay zekâ’dan ücretli bir Gemini anahtarı girin.',
+      throw LiveFailure(
+        l(
+          'Gemini anahtarı yok. Ayarlar’dan ücretli bir Gemini anahtarı girin.',
+        ),
       );
     }
     final events = LiveEvents();
@@ -321,7 +337,7 @@ class LiveConversation extends ChangeNotifier implements AjanVoice {
     await s.connect(
       key: key,
       instruction:
-          '$instruction ${ajanDates(DateTime.now())} ${ajanFolio()} ${ajanWrites()} '
+          '${Dil.en ? instructionEn : instruction} ${ajanDates(DateTime.now())} ${ajanFolio()} ${ajanWrites()} '
           '${ajanWorld()}'
           '${context(lines)}${tools.remembered}',
       tools: await tools.declarations(),
@@ -457,7 +473,7 @@ class LiveConversation extends ChangeNotifier implements AjanVoice {
       lines.add(
         LiveLine(
           'bilgi',
-          'Oturum yenilenemedi; maliyet artmasın diye konuşma kapandı.',
+          l('Oturum yenilenemedi; maliyet artmasın diye konuşma kapandı.'),
         ),
       );
       unawaited(stop());

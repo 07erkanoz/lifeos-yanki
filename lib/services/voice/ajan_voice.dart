@@ -47,6 +47,23 @@ bool isStopCommand(String said) {
       .where((w) => w.isNotEmpty)
       .toList();
   if (words.isEmpty || words.length > 5) return false;
+  // English: "stop", "close", "goodbye", "that's enough", "thanks".
+  const englishStops = {
+    'stop',
+    'close',
+    'quit',
+    'goodbye',
+    'bye',
+    'enough',
+    'shush',
+  };
+  if (words.any(englishStops.contains)) return true;
+  if (words.length <= 3 &&
+      (words.contains('thanks') ||
+          (words.contains('thank') && words.contains('you')) ||
+          (words.contains('never') && words.contains('mind')))) {
+    return true;
+  }
   const stops = {
     'kapan',
     'kapat',

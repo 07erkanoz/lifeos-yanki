@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 
+import '../../l10n/dil.dart';
 import '../mcp/mcp_client.dart';
 import '../mcp/mcp_servers.dart';
 
@@ -55,7 +56,7 @@ class AiStep extends AiEvent {
 
   String get label {
     final name = tool.replaceAll('_', ' ');
-    return done ? '$name tamam' : '$name çalışıyor';
+    return done ? l('{0} tamam', [name]) : l('{0} çalışıyor', [name]);
   }
 }
 
@@ -204,10 +205,12 @@ abstract final class AiAssistant {
     Future<void>? cancel,
   }) async {
     if (provider != AiProvider.claude) {
-      throw AiFailure('${provider.label} burada yalnız sesle kullanılır.');
+      throw AiFailure(
+        l('{0} burada yalnız sesle kullanılır.', [provider.label]),
+      );
     }
     final path = find(provider.command);
-    if (path == null) throw const AiFailure('Claude Code kurulu değil.');
+    if (path == null) throw AiFailure(l('Claude Code kurulu değil.'));
     final at = _allowedAt;
     if (_allowedCache == null ||
         at == null ||
@@ -323,9 +326,9 @@ abstract final class AiAssistant {
     final said = err.toString().trim().split('\n').last;
     throw AiFailure(
       code == -1
-          ? 'Claude 10 dakikada bitiremedi.'
+          ? l('Claude 10 dakikada bitiremedi.')
           : said.isEmpty
-          ? 'Claude cevap vermedi.'
+          ? l('Claude cevap vermedi.')
           : said,
     );
   }

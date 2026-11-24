@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../../l10n/dil.dart';
 import '../../services/voice/folio_ajan.dart';
 import '../../services/voice/live_conversation.dart';
 import 'ajan_skins.dart';
@@ -22,13 +23,13 @@ AjanMood moodOf(FolioAjan ajan) {
 }
 
 String moodWord(FolioAjan ajan) {
-  if (!ajan.settings.on) return 'Ses kapalı';
-  if (ajan.voice.state == LiveState.connecting) return 'Bağlanıyor';
+  if (!ajan.settings.on) return l('Ses kapalı');
+  if (ajan.voice.state == LiveState.connecting) return l('Bağlanıyor');
   return switch (moodOf(ajan)) {
-    AjanMood.idle => ajan.voice.active ? 'Hazır' : 'Dokun, konuş',
-    AjanMood.listening => 'Dinliyor',
-    AjanMood.speaking => 'Konuşuyor',
-    AjanMood.working => 'Çalışıyor',
+    AjanMood.idle => ajan.voice.active ? l('Hazır') : l('Dokun, konuş'),
+    AjanMood.listening => l('Dinliyor'),
+    AjanMood.speaking => l('Konuşuyor'),
+    AjanMood.working => l('Çalışıyor'),
   };
 }
 
@@ -65,6 +66,7 @@ class _YankiOrbState extends State<YankiOrb>
   void initState() {
     super.initState();
     ajan.addListener(_changed);
+    Dil.current.addListener(_changed);
   }
 
   void _tick(Duration elapsed) {
@@ -82,6 +84,7 @@ class _YankiOrbState extends State<YankiOrb>
   @override
   void dispose() {
     ajan.removeListener(_changed);
+    Dil.current.removeListener(_changed);
     _ticker.dispose();
     _clock.dispose();
     super.dispose();
@@ -91,7 +94,7 @@ class _YankiOrbState extends State<YankiOrb>
     for (final l in ajan.voice.lines.reversed) {
       if (l.text.trim().isNotEmpty) return l.text.trim();
     }
-    return ajan.voice.error ?? 'Yankı burada. Konuşmak için küreye dokunun.';
+    return ajan.voice.error ?? l('Yankı burada. Konuşmak için küreye dokunun.');
   }
 
   /// Whether there is anything to read beside the orb.
@@ -281,10 +284,10 @@ class _YankiOrbState extends State<YankiOrb>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _icon(Icons.open_in_full_rounded, 'Tam ekran', widget.onFull),
+              _icon(Icons.open_in_full_rounded, l('Tam ekran'), widget.onFull),
               _icon(
                 Icons.close_rounded,
-                'Gizle (dinlemeye devam)',
+                l('Gizle (dinlemeye devam)'),
                 widget.onClose,
               ),
             ],
