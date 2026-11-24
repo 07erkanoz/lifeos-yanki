@@ -34,6 +34,10 @@ abstract class AjanVoice implements Listenable {
 /// these words ("kapan", "sus", "yeter", "konuşmayı bitir"…). Heard on this
 /// computer from the transcript, so the conversation ends at once, without
 /// asking the model.
+/// Counts the conversations ended by [isStopCommand]: Yankı's window
+/// follows it when the person wants ([VoiceSettings.voiceClose]).
+final stopWordHeard = ValueNotifier<int>(0);
+
 bool isStopCommand(String said) {
   final words = said
       .toLowerCase()

@@ -9,9 +9,11 @@ import 'package:window_manager/window_manager.dart';
 import 'services/ai/ai_assistant.dart';
 import 'services/desktop/desktop_instance.dart';
 import 'services/desktop/global_shortcut.dart';
+import 'services/desktop/yanki_tray.dart';
 import 'services/mcp/mcp_client.dart';
 import 'services/voice/ajan_bridge.dart';
 import 'services/voice/ajan_approval.dart';
+import 'services/voice/ajan_voice.dart' show stopWordHeard;
 import 'services/voice/folio_ajan.dart';
 import 'services/voice/wake_word.dart';
 import 'ui/desktop/ajan_float.dart' show ajanFloatOpen;
@@ -106,6 +108,18 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
 
   FolioAjan get ajan => FolioAjan.instance;
 
+  late final _tray = YankiTray(
+    onOpen: () => unawaited(_full(null)),
+    onFloat: () => unawaited(_compact()),
+    onSettings: () => unawaited(_full(null).then((_) => _openSettings())),
+    onWake: (on) => unawaited(
+      ajan.saveSettings(
+        ajan.settings.copyWith(on: on || ajan.settings.on, wake: on),
+      ),
+    ),
+    onQuit: () => unawaited(_quit()),
+  );
+
   @override
   void initState() {
     super.initState();
@@ -114,13 +128,15 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     // there is nothing to listen for, and Yankı ends.
     unawaited(() async {
       await ajan.loadVoiceSettings();
-      if (widget.hidden && _mode == _Mode.hidden && !_wantWake) await _quit();
+      await _followTray();
+      if (widget.hidden && _mode == _Mode.hidden && !_stays) await _quit();
     }());
     FolioAjan.beforeVoice = WakeWord.instance.pause;
     WakeWord.instance.onWake = _woken;
     ajan.addListener(_followWake);
     AiSettings.on.addListener(_followWake);
     ajanFloatOpen.addListener(_floatChanged);
+    stopWordHeard.addListener(_stopWord);
     windowManager.addListener(this);
     windowManager.setPreventClose(true);
     _requests = widget.instance.requests.listen(_heard);
@@ -134,7 +150,29 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
   bool get _wantWake =>
       ajan.available && ajan.settings.on && ajan.settings.wake;
 
+  /// Kept running with no window: listening for the wake word, or in the
+  /// tray.
+  bool get _stays => _wantWake || (ajan.settings.tray && _tray.shown);
+
+  Future<void> _followTray() async {
+    if (ajan.settings.tray) {
+      await _tray.show(wake: _wantWake);
+    } else {
+      await _tray.hide();
+    }
+  }
+
+  /// "Kapan", "görüşürüz": the window goes too, when the person wants,
+  /// once "Konuşma kapatıldı" has been seen.
+  void _stopWord() {
+    if (!ajan.settings.voiceClose || _mode == _Mode.hidden) return;
+    Timer(const Duration(milliseconds: 900), () {
+      if (!ajan.voice.active) unawaited(_hide());
+    });
+  }
+
   void _followWake() {
+    unawaited(_followTray());
     final wake = WakeWord.instance;
     if (!_wantWake) {
       if (wake.on) unawaited(wake.stop());
@@ -172,7 +210,8 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     await AiSettings.reload();
     await ajan.loadSettings(quick: true);
     _followWake();
-    if (_mode == _Mode.hidden && !_wantWake) await _quit();
+    await _followTray();
+    if (_mode == _Mode.hidden && !_stays) await _quit();
   }
 
   Future<void> _full(String? token) async {
@@ -279,7 +318,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     if (ajan.voice.active) {
       await _brief(ajan.voice.stop, const Duration(seconds: 3));
     }
-    if (!_wantWake) return _quit();
+    if (!_stays) return _quit();
     _followWake();
   }
 
@@ -290,6 +329,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     await _brief(() => AjanBridge.setShown(false));
     if (ajan.voice.active) await _brief(ajan.voice.stop);
     await _brief(WakeWord.instance.stop);
+    await _brief(_tray.hide);
     McpClient.endAll();
     await _brief(widget.instance.close);
     exit(0);
@@ -297,12 +337,19 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
 
   final _navigator = GlobalKey<NavigatorState>();
 
+  bool _inSettings = false;
+
   Future<void> _openSettings() async {
     final nav = _navigator.currentState;
-    if (nav == null) return;
-    await nav.push(
-      MaterialPageRoute<void>(builder: (_) => YankiSettingsPage(ajan: ajan)),
-    );
+    if (nav == null || _inSettings) return;
+    _inSettings = true;
+    try {
+      await nav.push(
+        MaterialPageRoute<void>(builder: (_) => YankiSettingsPage(ajan: ajan)),
+      );
+    } finally {
+      _inSettings = false;
+    }
     await _settingsChanged();
   }
 
@@ -315,6 +362,7 @@ class _AjanAppState extends State<AjanApp> with WindowListener {
     ajan.removeListener(_followWake);
     AiSettings.on.removeListener(_followWake);
     ajanFloatOpen.removeListener(_floatChanged);
+    stopWordHeard.removeListener(_stopWord);
     windowManager.removeListener(this);
     appearance.dispose();
     super.dispose();

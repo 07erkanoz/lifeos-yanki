@@ -2,7 +2,7 @@ name: lifeos_yanki
 description: "LifeOS Yankı — LifeOS'un sesli ajanı (Linux)"
 publish_to: 'none'
 
-version: 0.1.1+2
+version: 0.1.2+3
 
 environment:
   sdk: ^3.13.2
@@ -25,6 +25,7 @@ dependencies:
   sherpa_onnx: ^1.13.8
   window_manager: ^0.5.1
   xml: ^7.0.1
+  tray_manager: ^0.8.3
 
 hooks:
   user_defines:

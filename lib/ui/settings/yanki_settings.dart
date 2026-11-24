@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../services/desktop/autostart.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../services/ai/ai_assistant.dart';
@@ -33,6 +35,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
   bool _geminiKept = false;
   List<AiStatus>? _programs;
   final _probes = <String, (int, String?)?>{};
+  bool? _autostart;
 
   @override
   void initState() {
@@ -44,6 +47,10 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
     unawaited(() async {
       final k = await GroqChat.key(ApiService.gemini);
       if (mounted) setState(() => _geminiKept = k != null);
+    }());
+    unawaited(() async {
+      final on = await Autostart.isOn();
+      if (mounted) setState(() => _autostart = on);
     }());
     unawaited(() async {
       final s = await AiAssistant.statuses();
@@ -106,6 +113,13 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 (v) => ajan.saveSettings(s.copyWith(wake: v)),
               ),
               _switch(
+                'Sesle kapat',
+                '“Kapan”, “görüşürüz”, “teşekkürler” denince konuşma biter '
+                    've pencere de kapanır (tepsiye ya da dinlemeye döner).',
+                s.voiceClose,
+                (v) => ajan.saveSettings(s.copyWith(voiceClose: v)),
+              ),
+              _switch(
                 'Kulaklık',
                 'Yankı konuşurken araya girilebilir; ses mikrofona geri '
                     'dönmez.',
@@ -147,6 +161,26 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                     },
                   ),
                 ),
+              ),
+            ]),
+            _section('Masaüstü', [
+              _switch(
+                'Sistem tepsisinde kal',
+                'Pencere kapanınca Yankı tepside durur; simgeye tıklayınca '
+                    'açılır, menüsünden küre, ayarlar ve çıkış seçilir. '
+                    'GNOME’da AppIndicator eklentisi gerekir.',
+                s.tray,
+                (v) => ajan.saveSettings(s.copyWith(tray: v)),
+              ),
+              _switch(
+                'Oturum açılınca başla',
+                'Pencere açmadan başlar: tepside durur, “Sesle aç” açıksa '
+                    'uyandırma sözünü dinler.',
+                _autostart ?? false,
+                (v) async {
+                  setState(() => _autostart = v);
+                  await Autostart.set(v);
+                },
               ),
             ]),
             _section('Programlar', [

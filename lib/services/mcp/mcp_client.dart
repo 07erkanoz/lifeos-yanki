@@ -50,6 +50,7 @@ class McpClient {
     }
     _running.clear();
   }
+
   final _waiting = <int, Completer<Map<String, Object?>>>{};
   var _next = 0;
   List<Map<String, Object?>>? _tools;

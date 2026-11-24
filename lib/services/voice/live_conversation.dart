@@ -443,6 +443,7 @@ class LiveConversation extends ChangeNotifier implements AjanVoice {
     if (isStopCommand(_heardLine?.text ?? '')) {
       _endTurn();
       unawaited(stop());
+      stopWordHeard.value++;
       return;
     }
     lastTurn = _turn;

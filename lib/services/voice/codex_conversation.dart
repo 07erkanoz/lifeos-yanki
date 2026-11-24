@@ -781,6 +781,7 @@ class CodexConversation extends ChangeNotifier implements AjanVoice {
       if (isStopCommand(text)) {
         lines.add(LiveLine('bilgi', 'Konuşma kapatıldı.'));
         unawaited(stop());
+        stopWordHeard.value++;
         return;
       }
     } else {

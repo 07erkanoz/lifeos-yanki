@@ -6,6 +6,8 @@ LifeOS'un sesli yapay zekâ ajanı. Yalnız Linux'ta çalışır ve LifeOS Folio
 - **Ağır işler:** Claude Code (`claude -p`) yapar ve açık MCP sunucularının yalnız okuyan araçlarını kullanır.
 - **Uyandırma:** "Merhaba Yankı", "Yankı açıl" ya da "Ajan açıl" denince açılır. Tanıma Vosk ile bu bilgisayarda yapılır; hiçbir ses dışarı gitmez.
 - **MCP:** Yerleşik iki sunucu var: LifeOS Folio (`lifeos_folio --mcp --dis`) ve LifeOS Linux (`lifeos mcp sun`). Ayarlar › MCP sunucuları'ndan stdio ile konuşan herhangi bir sunucu eklenebilir. Değişiklik yapan araçlar çalışmadan önce ekranda onay ister.
+- **Tepsi:** Pencere kapanınca sistem tepsisinde durur (KDE paneli; GNOME'da AppIndicator eklentisiyle). Simgeye tıklayınca açılır; menüsünden yüzen küre, "Merhaba Yankı" ile açma, ayarlar ve çıkış seçilir. Ayarlar › Masaüstü'nden kapatılabilir; oturum açılınca başlaması da oradan açılıp kapanır.
+- **Sesle kapatma:** "Kapan", "görüşürüz", "teşekkürler" denince konuşma biter ve pencere de kapanır (Ayarlar › Ses › Sesle kapat).
 - **Görünüm:** Tam ekranda üç seçenek var: *Yankı* (dalga, enerji küresi, ağ), *Ağ* (geodezik küre) ve *Dalga* (ışık halkası). Hepsi sesin gerçek seviye geçmişiyle oynar; arka plan bir GLSL shader'ıdır (`shaders/yanki_nebula.frag`). Küçültünce masaüstünde her zaman üstte duran, sürüklenebilen bir küre olur.
 
 ## Derleme ve kurulum

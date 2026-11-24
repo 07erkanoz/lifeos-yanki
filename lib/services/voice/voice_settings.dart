@@ -23,7 +23,17 @@ class VoiceSettings {
     this.wake = false,
     this.skin = 'yanki',
     this.city = '',
+    this.tray = true,
+    this.voiceClose = true,
   });
+
+  /// Yankı stays in the system tray when its window closes, even with the
+  /// wake word off; its menu opens it again.
+  final bool tray;
+
+  /// "Kapan", "görüşürüz"…: the window goes with the conversation (to the
+  /// tray, or listening for the wake word).
+  final bool voiceClose;
 
   /// The person's city, for the weather ("Kadıköy/İstanbul").
   final String city;
@@ -63,6 +73,8 @@ class VoiceSettings {
           wake: json['sesle_ac'] == true,
           skin: '${json['gorunum'] ?? 'yanki'}',
           city: '${json['sehir'] ?? ''}',
+          tray: json['tepside'] != false,
+          voiceClose: json['sesle_kapat'] != false,
         )
       : const VoiceSettings();
 
@@ -77,6 +89,8 @@ class VoiceSettings {
     'sesle_ac': wake,
     'gorunum': skin,
     'sehir': city,
+    'tepside': tray,
+    'sesle_kapat': voiceClose,
   };
 
   VoiceSettings copyWith({
@@ -90,6 +104,8 @@ class VoiceSettings {
     bool? wake,
     String? skin,
     String? city,
+    bool? tray,
+    bool? voiceClose,
   }) => VoiceSettings(
     on: on ?? this.on,
     headphones: headphones ?? this.headphones,
@@ -101,6 +117,8 @@ class VoiceSettings {
     wake: wake ?? this.wake,
     skin: skin ?? this.skin,
     city: city ?? this.city,
+    tray: tray ?? this.tray,
+    voiceClose: voiceClose ?? this.voiceClose,
   );
 
   static Future<File> Function() file = () async =>
