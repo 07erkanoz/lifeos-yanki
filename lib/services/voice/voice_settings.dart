@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../l10n/dil.dart';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -26,7 +27,13 @@ class VoiceSettings {
     this.tray = true,
     this.voiceClose = true,
     this.language = 'sistem',
+    this.claudeModel = '',
+    this.claudeEffort = 'medium',
   });
+
+  /// Claude Code's model for the heavy work ('opus', 'sonnet'…); its own
+  /// default when empty. And how hard it thinks (low … max).
+  final String claudeModel, claudeEffort;
 
   /// Yankı's language: 'sistem' (the computer's), 'tr' or 'en'.
   final String language;
@@ -80,6 +87,8 @@ class VoiceSettings {
           tray: json['tepside'] != false,
           voiceClose: json['sesle_kapat'] != false,
           language: '${json['dil'] ?? 'sistem'}',
+          claudeModel: '${json['claude_model'] ?? ''}',
+          claudeEffort: '${json['claude_efor'] ?? 'medium'}',
         )
       : const VoiceSettings();
 
@@ -97,6 +106,8 @@ class VoiceSettings {
     'tepside': tray,
     'sesle_kapat': voiceClose,
     'dil': language,
+    'claude_model': claudeModel,
+    'claude_efor': claudeEffort,
   };
 
   VoiceSettings copyWith({
@@ -113,6 +124,8 @@ class VoiceSettings {
     bool? tray,
     bool? voiceClose,
     String? language,
+    String? claudeModel,
+    String? claudeEffort,
   }) => VoiceSettings(
     on: on ?? this.on,
     headphones: headphones ?? this.headphones,
@@ -127,6 +140,8 @@ class VoiceSettings {
     tray: tray ?? this.tray,
     voiceClose: voiceClose ?? this.voiceClose,
     language: language ?? this.language,
+    claudeModel: claudeModel ?? this.claudeModel,
+    claudeEffort: claudeEffort ?? this.claudeEffort,
   );
 
   static Future<File> Function() file = () async =>
@@ -181,8 +196,11 @@ String spokenPrompt(String question, DateTime now) {
   final day = DateTime(now.year, now.month, now.day);
   String iso(DateTime d) => d.toIso8601String().substring(0, 10);
   final until = day.add(const Duration(days: 13));
-  return 'Bu soru sesli soruldu; cevabın avukata olduğu gibi sesli '
-      'okunacak. Türkçe, kısa ve net cevap ver, “siz” diye hitap et; '
+  final language = Dil.en
+      ? 'Answer in English, briefly and clearly, with no formatting. '
+      : '';
+  return '${language}Bu soru sesli soruldu; cevabın avukata olduğu gibi sesli '
+      'okunacak. ${Dil.en ? 'İngilizce' : 'Türkçe'}, kısa ve net cevap ver, “siz” diye hitap et; '
       'biçimlendirme, tablo ya da madde işareti kullanma. Bugün '
       '${ajanToday(now)}. Ajandaya bakarken bugünden ${iso(until)} gününe '
       'kadar iki haftayı oku (${iso(day)} – ${iso(until)}). Avukatın kendi '

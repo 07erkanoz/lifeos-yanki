@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../services/voice/voice_settings.dart';
+import '../../services/voice/codex_conversation.dart';
 import '../../services/desktop/autostart.dart';
 
 import 'package:flutter/material.dart';
@@ -37,6 +39,9 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
   List<AiStatus>? _programs;
   final _probes = <String, (int, String?)?>{};
   bool? _autostart;
+  CodexCatalog? _catalog;
+  String? _catalogError;
+  String? _sampling;
 
   @override
   void initState() {
@@ -54,6 +59,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
       final on = await Autostart.isOn();
       if (mounted) setState(() => _autostart = on);
     }());
+    unawaited(_loadCatalog());
     unawaited(() async {
       final s = await AiAssistant.statuses();
       if (mounted) setState(() => _programs = s);
@@ -72,6 +78,182 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
 
   void _changed() {
     if (mounted) setState(() {});
+  }
+
+  /// Codex's models and voices, asked of Codex itself.
+  Future<void> _loadCatalog() async {
+    try {
+      final c = await ajan.codex.catalog().timeout(const Duration(seconds: 40));
+      if (mounted) setState(() => _catalog = c);
+    } catch (e) {
+      if (mounted) {
+        setState(
+          () => _catalogError = l('Codex’in listesi alınamadı: {0}', [e]),
+        );
+      }
+    }
+  }
+
+  Future<void> _sample(String voice) async {
+    if (_sampling != null || ajan.voice.active) return;
+    setState(() => _sampling = voice);
+    try {
+      await ajan.codex.sample(voice);
+    } catch (_) {
+    } finally {
+      if (mounted) setState(() => _sampling = null);
+    }
+  }
+
+  static String _effortName(String e) => switch (e) {
+    'minimal' => l('En az'),
+    'low' => l('Düşük'),
+    'medium' => l('Orta'),
+    'high' => l('Yüksek'),
+    'xhigh' => l('Çok yüksek'),
+    'max' => l('En yüksek'),
+    final other => other,
+  };
+
+  static String _title(String id) =>
+      id.isEmpty ? id : '${id[0].toUpperCase()}${id.substring(1)}';
+
+  /// A dropdown of [options] (value → what it shows); a [value] not among
+  /// them is shown too, as it is.
+  Widget _choice(
+    String value,
+    Map<String, String> options,
+    ValueChanged<String> onChanged,
+  ) {
+    final all = {...options, if (!options.containsKey(value)) value: value};
+    return DropdownButton<String>(
+      value: value,
+      dropdownColor: _panel,
+      underline: const SizedBox.shrink(),
+      items: [
+        for (final MapEntry(:key, :value) in all.entries)
+          DropdownMenuItem(value: key, child: Text(value)),
+      ],
+      onChanged: (v) => v == null ? null : onChanged(v),
+    );
+  }
+
+  List<Widget> _models(VoiceSettings s) {
+    final c = _catalog;
+    final model =
+        c?.models.where((m) => m.id == s.codexModel).firstOrNull ??
+        c?.models.where((m) => m.isDefault).firstOrNull;
+    final efforts = (model?.efforts.isNotEmpty ?? false)
+        ? model!.efforts
+        : const ['low', 'medium', 'high', 'xhigh'];
+    Widget waiting() => c == null && _catalogError == null
+        ? const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : Text(l('Codex yok'), style: const TextStyle(color: _muted));
+    return [
+      _row(
+        l('Codex modeli'),
+        _catalogError ??
+            l('Sesin arkasında düşünen model. Boşsa Codex’in varsayılanı.'),
+        c == null
+            ? waiting()
+            : _choice(s.codexModel, {
+                '': l('Varsayılan'),
+                for (final m in c.models)
+                  m.id: m.isDefault ? l('{0} (varsayılan)', [m.name]) : m.name,
+              }, (v) => ajan.saveSettings(s.copyWith(codexModel: v))),
+      ),
+      _row(
+        l('Codex düşünmesi'),
+        l(
+          'Arttıkça cevap gecikir ve kota daha çok harcanır; sesli sohbet '
+          'için düşük önerilir.',
+        ),
+        _choice(s.codexEffort, {
+          for (final e in efforts) e: _effortName(e),
+        }, (v) => ajan.saveSettings(s.copyWith(codexEffort: v))),
+      ),
+      _row(
+        l('Codex sesi'),
+        l('Yankı’nın konuşan sesi. ▶ ile bir cümle dinleyin.'),
+        c == null
+            ? waiting()
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _choice(s.codexVoice, {
+                    '': l('Varsayılan'),
+                    for (final v in c.voices) v: _title(v),
+                  }, (v) => ajan.saveSettings(s.copyWith(codexVoice: v))),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    tooltip: l('Dinle'),
+                    onPressed: _sampling != null || ajan.voice.active
+                        ? null
+                        : () => unawaited(_sample(s.codexVoice)),
+                    icon: _sampling != null
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.play_arrow_rounded),
+                  ),
+                ],
+              ),
+      ),
+      _switch(
+        l('Ağır işleri Claude yapsın'),
+        l(
+          'Taslak, uzun inceleme ve araştırma Claude Code’a gider; kapalıyken '
+          'Codex hepsini kendisi yapar.',
+        ),
+        s.handOn,
+        (v) => ajan.saveSettings(s.copyWith(handOn: v)),
+      ),
+      _row(
+        l('Claude modeli'),
+        l('Ağır işleri yapan model. Varsayılan: Claude Code’un kendi seçimi.'),
+        _choice(s.claudeModel, {
+          '': l('Varsayılan'),
+          'fable': 'Fable',
+          'opus': 'Opus',
+          'sonnet': 'Sonnet',
+          'haiku': 'Haiku',
+        }, (v) => ajan.saveSettings(s.copyWith(claudeModel: v))),
+      ),
+      _row(
+        l('Claude eforu'),
+        l(
+          'Claude’un ne kadar düşüneceği; yüksek efor daha yavaş ve pahalıdır.',
+        ),
+        _choice(s.claudeEffort, {
+          for (final e in const ['low', 'medium', 'high', 'xhigh', 'max'])
+            e: _effortName(e),
+        }, (v) => ajan.saveSettings(s.copyWith(claudeEffort: v))),
+      ),
+      _row(
+        l('Gemini sesi'),
+        l('Codex yokken konuşan yedek ses.'),
+        _choice(s.voice, {
+          '': l('Varsayılan'),
+          for (final v in const [
+            'Puck',
+            'Charon',
+            'Kore',
+            'Fenrir',
+            'Aoede',
+            'Leda',
+            'Orus',
+            'Zephyr',
+          ])
+            v: v,
+        }, (v) => ajan.saveSettings(s.copyWith(voice: v))),
+      ),
+    ];
   }
 
   Future<void> _probe(McpServerConfig s) async {
@@ -219,6 +401,7 @@ class _YankiSettingsPageState extends State<YankiSettingsPage> {
                 },
               ),
             ]),
+            _section(l('Modeller'), _models(s)),
             _section(l('Programlar'), [
               for (final p in _programs ?? const <AiStatus>[])
                 _row(

@@ -9,6 +9,7 @@ LifeOS'un sesli yapay zekâ ajanı. Yalnız Linux'ta çalışır ve LifeOS Folio
 - **Dil:** Türkçe ve İngilizce. Ekran ve konuşma bilgisayarın dilini izler; Ayarlar › Genel › Dil'den değiştirilir.
 - **Ses:** Codex (ChatGPT aboneliği, WebRTC realtime) ana sestir. Codex yoksa Gemini Live devreye girer.
 - **Ağır işler:** Claude Code (`claude -p`) yapar ve açık MCP sunucularının yalnız okuyan araçlarını kullanır.
+- **Modeller:** Ayarlar › Modeller'den Codex'in modeli, düşünmesi ve sesi (liste Codex'ten gelir, ▶ ile dinlenir), Claude'un modeli ve eforu, Gemini'nin sesi seçilir.
 - **Uyandırma:** "Merhaba Yankı", "Yankı açıl" ya da "Ajan açıl" denince açılır. Tanıma Vosk ile bu bilgisayarda yapılır; hiçbir ses dışarı gitmez.
 - **MCP:** Yerleşik iki sunucu var: LifeOS Folio (`lifeos_folio --mcp --dis`) ve LifeOS Linux (`lifeos mcp sun`). Ayarlar › MCP sunucuları'ndan stdio ile konuşan herhangi bir sunucu eklenebilir. Değişiklik yapan araçlar çalışmadan önce ekranda onay ister.
 - **Tepsi:** Pencere kapanınca sistem tepsisinde durur. Simgeye tıklayınca açılır; menüsünden yüzen küre, "Merhaba Yankı" ile açma, ayarlar ve çıkış seçilir. Ayarlar › Masaüstü'nden kapatılabilir; oturum açılınca başlaması da oradan açılıp kapanır.
@@ -74,6 +75,7 @@ LifeOS's voice AI assistant, for Linux only. It stands on its own; when LifeOS F
 - **Language:** Turkish and English. The screens and the conversation follow the computer's language; change it in Settings › General › Language.
 - **Voice:** Codex (your ChatGPT subscription, WebRTC realtime) is the main voice; without Codex, Gemini Live takes over.
 - **Heavy work:** Claude Code (`claude -p`) does it, with only the read-only tools of the enabled MCP servers.
+- **Models:** Settings › Models picks Codex's model, thinking and voice (listed by Codex itself, with ▶ to hear it), Claude's model and effort, and Gemini's voice.
 - **Wake word:** say "Merhaba Yankı" or "Yankı açıl". It is recognised on this computer with Vosk; no audio leaves it.
 - **MCP:** two servers come built in: LifeOS Folio (`lifeos_folio --mcp --dis`) and LifeOS Linux (`lifeos mcp sun`). Any stdio MCP server can be added in Settings › MCP servers. Tools that change something ask for your approval on screen first.
 - **Tray:** when the window closes, Yankı stays in the system tray. Click the icon to open it; the menu has the floating orb, the wake word, settings and quit. Both the tray and starting at login can be turned off in Settings › Desktop.

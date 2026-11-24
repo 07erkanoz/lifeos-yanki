@@ -196,6 +196,10 @@ abstract final class AiAssistant {
 
   /// [prompt] asked of Claude Code (`claude -p`), with the MCP servers on;
   /// its answer's text.
+  /// Claude Code's model and effort, as Yankı's settings say (empty: the
+  /// program's own, and the asked tier's).
+  static String claudeModel = '', claudeEffort = '';
+
   static Future<String> ask(
     AiProvider provider,
     String prompt, {
@@ -231,7 +235,11 @@ abstract final class AiAssistant {
         '-p',
         '--system-prompt',
         _system,
-        if (tier != null) ...['--effort', tier.effort],
+        if (claudeModel.isNotEmpty) ...['--model', claudeModel],
+        if (claudeEffort.isNotEmpty)
+          ...['--effort', claudeEffort]
+        else if (tier != null)
+          ...['--effort', tier.effort],
         '--mcp-config',
         jsonEncode(McpServers.instance.claudeConfig()),
         '--strict-mcp-config',

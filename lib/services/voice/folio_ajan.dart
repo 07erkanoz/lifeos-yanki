@@ -418,6 +418,8 @@ class FolioAjan extends ChangeNotifier {
       ..model = s.codexModel
       ..effort = s.codexEffort
       ..handOn = s.handOn && claude != null;
+    AiAssistant.claudeModel = s.claudeModel;
+    AiAssistant.claudeEffort = s.claudeEffort;
   }
 
   Future<void> saveSettings(VoiceSettings s) async {

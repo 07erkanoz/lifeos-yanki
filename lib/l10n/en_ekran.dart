@@ -203,4 +203,31 @@ const enEkran = <String, String>{
   'Küçük': 'Small',
   'Normal': 'Normal',
   'Büyük': 'Large',
+  'Codex’in listesi alınamadı: {0}': 'Could not get Codex’s list: {0}',
+  'En az': 'Minimal',
+  'En yüksek': 'Maximum',
+  'Codex yok': 'No Codex',
+  'Codex modeli': 'Codex model',
+  'Sesin arkasında düşünen model. Boşsa Codex’in varsayılanı.':
+      'The model that thinks behind the voice. Codex’s default when empty.',
+  'Varsayılan': 'Default',
+  '{0} (varsayılan)': '{0} (default)',
+  'Codex düşünmesi': 'Codex thinking',
+  'Arttıkça cevap gecikir ve kota daha çok harcanır; sesli sohbet için düşük önerilir.': 'Higher means slower answers and more of your quota; low is best for voice.',
+  'Codex sesi': 'Codex voice',
+  'Yankı’nın konuşan sesi. ▶ ile bir cümle dinleyin.':
+      'The voice Yankı speaks with. Press ▶ to hear a sentence.',
+  'Dinle': 'Listen',
+  'Ağır işleri Claude yapsın': 'Let Claude do the heavy work',
+  'Taslak, uzun inceleme ve araştırma Claude Code’a gider; kapalıyken Codex hepsini kendisi yapar.': 'Drafts, long reviews and research go to Claude Code; when off, Codex does it all itself.',
+  'Claude modeli': 'Claude model',
+  'Ağır işleri yapan model. Varsayılan: Claude Code’un kendi seçimi.':
+      'The model for the heavy work. Default: Claude Code’s own choice.',
+  'Claude eforu': 'Claude effort',
+  'Claude’un ne kadar düşüneceği; yüksek efor daha yavaş ve pahalıdır.':
+      'How hard Claude thinks; higher effort is slower and costs more.',
+  'Gemini sesi': 'Gemini voice',
+  'Codex yokken konuşan yedek ses.':
+      'The fallback voice when Codex is not available.',
+  'Modeller': 'Models',
 };
